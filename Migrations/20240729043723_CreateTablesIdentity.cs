@@ -12,12 +12,12 @@ namespace TiTools_backend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+            /*migrationBuilder.AddColumn<int>(
                 name: "LoanId",
                 table: "Equipments",
                 type: "int",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0);*/
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
@@ -73,7 +73,7 @@ namespace TiTools_backend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+            /*migrationBuilder.CreateTable(
                 name: "Loans",
                 columns: table => new
                 {
@@ -88,7 +88,7 @@ namespace TiTools_backend.Migrations
                 {
                     table.PrimaryKey("PK_Loans", x => x.LoanId);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                .Annotation("MySql:CharSet", "utf8mb4");*/
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
@@ -217,10 +217,10 @@ namespace TiTools_backend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateIndex(
+            /*migrationBuilder.CreateIndex(
                 name: "IX_Equipments_LoanId",
                 table: "Equipments",
-                column: "LoanId");
+                column: "LoanId");*/
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -259,21 +259,18 @@ namespace TiTools_backend.Migrations
                 column: "NormalizedUserName",
                 unique: true);
 
-            migrationBuilder.AddForeignKey(
+            /*migrationBuilder.AddForeignKey(
                 name: "FK_Equipments_Loans_LoanId",
                 table: "Equipments",
                 column: "LoanId",
                 principalTable: "Loans",
                 principalColumn: "LoanId",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade);*/
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Equipments_Loans_LoanId",
-                table: "Equipments");
+        {           
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -291,21 +288,12 @@ namespace TiTools_backend.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Loans");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Equipments_LoanId",
-                table: "Equipments");
-
-            migrationBuilder.DropColumn(
-                name: "LoanId",
-                table: "Equipments");
+            
         }
     }
 }
