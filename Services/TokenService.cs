@@ -10,7 +10,7 @@ namespace TiTools_backend.Services
     {
         public JwtSecurityToken GenerateAccessToken(IEnumerable<Claim> claims,IConfiguration _config)
         {
-            var key = _config.GetSection("Jwt").GetValue<string>("SecretKey");
+            var key = _config.GetSection("JwtTest").GetValue<string>("SecretKey");
             var privateKey = Encoding.UTF8.GetBytes(key);
 
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(privateKey), SecurityAlgorithms.HmacSha256Signature);
@@ -18,10 +18,10 @@ namespace TiTools_backend.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_config.GetSection("Jwt").GetValue<double>("TokenValidityInMinutes")),
-                Audience = _config.GetSection("Jwt")
+                Expires = DateTime.UtcNow.AddMinutes(_config.GetSection("JwtTest").GetValue<double>("TokenValidityInMinutes")),
+                Audience = _config.GetSection("JwtTest")
                            .GetValue<string>("ValidAudience"),
-                Issuer = _config.GetSection("Jwt")
+                Issuer = _config.GetSection("JwtTest")
                          .GetValue<string>("ValidIssuer"),
                 SigningCredentials = signingCredentials
             };
@@ -46,7 +46,7 @@ namespace TiTools_backend.Services
 
         ClaimsPrincipal ITokenService.GetPrincipalFromExpiredToken(string token, IConfiguration _config)
         {
-            var secretKey = _config["Jwt:SecretKey"] ?? throw new InvalidOperationException("Invalid key");
+            var secretKey = _config["JwtTest:SecretKey"] ?? throw new InvalidOperationException("Invalid key");
 
             var tokenValidationParameters = new TokenValidationParameters
             {

@@ -48,7 +48,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-var secretKey = builder.Configuration["Jwt:SecretKey"]
+var secretKey = builder.Configuration["JwtTest:SecretKey"]
     ?? throw new ArgumentException("Invalid secret key!!");
 
 builder.Services.AddAuthentication(options =>
@@ -66,8 +66,8 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ClockSkew = TimeSpan.Zero,
-        ValidAudience = builder.Configuration["Jwt:ValidAudience"],
-        ValidIssuer = builder.Configuration["Jwt.ValidIssuer"],
+        ValidAudience = builder.Configuration["JwtTest:ValidAudience"],
+        ValidIssuer = builder.Configuration["JwtTest:ValidIssuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
 });
