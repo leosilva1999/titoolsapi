@@ -26,6 +26,7 @@ namespace TiTools_backend.Services
                 SigningCredentials = signingCredentials
             };
 
+            var tokenValidityListener = _config.GetSection("JwtTest").GetValue<double>("TokenValidityInMinutes");
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
 

@@ -54,7 +54,7 @@ namespace TiTools_backend.Controllers
                 var token = _tokenService.GenerateAccessToken(authClaims, _config);
                 var refreshToken = _tokenService.GenerateRefreshToken();
 
-                _ = int.TryParse(_config["Jwt.RefreshTokenValidityInMinutes"],
+                _ = int.TryParse(_config["JwtTest:RefreshTokenValidityInMinutes"],
                     out int refreshTokenValidityInMinutes);
 
                 user.RefreshToken = refreshToken;
@@ -136,19 +136,19 @@ namespace TiTools_backend.Controllers
             {
                 return BadRequest("Invalid access token/refresh token");
             }
-            
-            string userEmail = principal.Claims.FirstOrDefault(c =>  c.Type=="Email")?.Value;
 
-            if(userEmail is null)
+            string userName = principal.Identity.Name;
+
+            if(userName is null)
             {
                 return BadRequest("Invalid access token/refresh token");
             }
 
-            var user = await _userManager.FindByEmailAsync(userEmail);
+            var user = await _userManager.FindByNameAsync(userName);
 
             if (user == null || user.RefreshToken != refreshToken
                             || user.RefreshTokenExpiryTime <= DateTime.Now) {
-                return BadRequest("Invalid access token/refresh token");
+                return BadRequest("Invalid access token/refresh token(user invalid)");
             }
 
             var newAccessToken = _tokenService.GenerateAccessToken(
