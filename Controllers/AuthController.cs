@@ -184,5 +184,28 @@ namespace TiTools_backend.Controllers
             return NoContent();
 
         }
+
+        [HttpPost]
+        [Route("CreateRole")]
+        public async Task<IActionResult> CreateRole(string roleName)
+        {
+            var roleExists = await _roleManager.RoleExistsAsync(roleName);
+            if (!roleExists)
+            {
+                var roleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
+                if (roleResult.Succeeded)
+                {
+                    return StatusCode(StatusCodes.Status200OK,
+                        new Response { Status = "Success", Message = $"Role {roleName} added successfully" });
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest,
+                        new Response { Status = "Error", Message = $"Issue adding the new {roleName} role" });
+                }
+            }
+            return StatusCode(StatusCodes.Status400BadRequest,
+                new Response { Status = "Error", Message = "Role already exists." });
+        }
     }
 }
