@@ -207,5 +207,26 @@ namespace TiTools_backend.Controllers
             return StatusCode(StatusCodes.Status400BadRequest,
                 new Response { Status = "Error", Message = "Role already exists." });
         }
+
+        [HttpPost]
+        [Route("AddUserToRole")]
+        public async Task<IActionResult> AddUserToRole(string email, string roleName)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var result = await _userManager.AddToRoleAsync(user, roleName);
+                if (result.Succeeded)
+                {
+                    return StatusCode(StatusCodes.Status200OK,
+                        new Response
+                        {
+                            Status = "Success",
+                            Message = $"User {user.Email} added to the {roleName} role"
+                        });
+                }
+            }
+            return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User not found" });
+        }
     }
 }
