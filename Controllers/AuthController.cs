@@ -117,6 +117,7 @@ namespace TiTools_backend.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "UserOnly")]
         [Route("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] TokenModelDTO tokenModel)
         {
@@ -166,7 +167,7 @@ namespace TiTools_backend.Controllers
             });
         }
 
-        [Authorize]
+        [Authorize(Policy = "SuperAdminOnly")]
         [HttpPost]
         [Route("revoke/{useremail}")]
         public async Task<IActionResult> Revoke(string useremail)
@@ -185,6 +186,7 @@ namespace TiTools_backend.Controllers
 
         }
 
+        [Authorize(Policy = "SuperAdminOnly")]
         [HttpPost]
         [Route("CreateRole")]
         public async Task<IActionResult> CreateRole(string roleName)
@@ -208,6 +210,7 @@ namespace TiTools_backend.Controllers
                 new Response { Status = "Error", Message = "Role already exists." });
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         [Route("AddUserToRole")]
         public async Task<IActionResult> AddUserToRole(string email, string roleName)

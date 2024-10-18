@@ -20,17 +20,19 @@ namespace TiTools_backend.Controllers
         //get
 
         
-        [Authorize]
+        [Authorize(Policy = "UserOnly")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             
                 var equipmentList = await _context.Equipments.ToListAsync();
-            
 
-            
 
-            return Ok(equipmentList);
+            if (equipmentList is not null)
+            {
+                return Ok(equipmentList);
+            }
+            return BadRequest();
         }
     }
 }
