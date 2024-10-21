@@ -74,18 +74,18 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
 
     options.AddPolicy("SuperAdminOnly", policy => 
-        policy.RequireRole("Admin").RequireClaim("id", "Teste"));
+        policy.RequireRole("admin").RequireClaim("unique_name", "usertest"));
 
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("user"));
 
     options.AddPolicy("ExclusiveOnly",
         policy => policy.RequireAssertion(context =>
         context.User.HasClaim(claim => claim.Type == "id" &&
-                                       claim.Value == "Teste") ||
-                                       context.User.IsInRole("SuperAdmin")));
+                                       claim.Value == "usertest") ||
+                                       context.User.IsInRole("superadmin")));
 });
 
 string? MySqlConnection = builder.Configuration.GetConnectionString("MySqlConnection");

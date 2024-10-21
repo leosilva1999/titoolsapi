@@ -109,10 +109,10 @@ namespace TiTools_backend.Controllers
                     });
             }
             return Ok(
-                new Response 
-                { 
-                    Status = "Success", 
-                    Message = "User created successfully!" 
+                new Response
+                {
+                    Status = "Success",
+                    Message = "User created successfully!"
                 });
         }
 
@@ -121,7 +121,7 @@ namespace TiTools_backend.Controllers
         [Route("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] TokenModelDTO tokenModel)
         {
-            if(tokenModel == null)
+            if (tokenModel == null)
             {
                 return BadRequest("Invalid client request!");
             }
@@ -133,14 +133,14 @@ namespace TiTools_backend.Controllers
 
             var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken!, _config);
 
-            if(principal == null)
+            if (principal == null)
             {
                 return BadRequest("Invalid access token/refresh token");
             }
 
             string userName = principal.Identity.Name;
 
-            if(userName is null)
+            if (userName is null)
             {
                 return BadRequest("Invalid access token/refresh token");
             }
@@ -148,7 +148,8 @@ namespace TiTools_backend.Controllers
             var user = await _userManager.FindByNameAsync(userName);
 
             if (user == null || user.RefreshToken != refreshToken
-                            || user.RefreshTokenExpiryTime <= DateTime.Now) {
+                            || user.RefreshTokenExpiryTime <= DateTime.Now)
+            {
                 return BadRequest("Invalid access token/refresh token(user invalid)");
             }
 
@@ -226,6 +227,28 @@ namespace TiTools_backend.Controllers
                         {
                             Status = "Success",
                             Message = $"User {user.Email} added to the {roleName} role"
+                        });
+                }
+            }
+            return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User not found" });
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost]
+        [Route("RemoveUserFromRole")]
+        public async Task<IActionResult> RemoveUserFromRole(string email, string roleName)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+                if (result.Succeeded)
+                {
+                    return StatusCode(StatusCodes.Status200OK,
+                        new Response
+                        {
+                            Status = "Success",
+                            Message = $"User {user.Email} removed from the {roleName} role"
                         });
                 }
             }
