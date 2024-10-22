@@ -20,7 +20,7 @@ namespace TiTools_backend.Controllers
         //get
 
         
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "UserOnly")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
