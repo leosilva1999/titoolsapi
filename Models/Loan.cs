@@ -17,7 +17,7 @@ namespace TiTools_backend.Models
         public DateTime RequestTime { get; set; }
         public DateTime ReturnTime { get; set; }
 
-        public ICollection<Equipment>? Equipments { get; set; }
+        public List<Equipment> Equipments { get; } = [];
 
     }
 }
