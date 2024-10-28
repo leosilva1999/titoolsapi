@@ -39,7 +39,7 @@ namespace TiTools_backend.Controllers
 
         [Authorize(policy: "UserOnly")]
         [HttpPost]
-        public async Task<IActionResult> PostEquipment([FromBody] Equipment model)
+        public async Task<IActionResult> PostEquipment(Equipment model)
         {
             var equipmentExists = await _context.Equipments.FindAsync(model.EquipmentId);
 
@@ -90,8 +90,7 @@ namespace TiTools_backend.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEquipment(int id, Equipment model)
-        {
+        public async Task<IActionResult> PutEquipment(int id, Equipment model) {
 
             if (id != model.EquipmentId)
             {
@@ -99,7 +98,7 @@ namespace TiTools_backend.Controllers
                     new Response
                     {
                         Status = "Error",
-                        Message = "Equipment not found"
+                        Message = "Equipment not found1"
                     });
             }
 
@@ -125,6 +124,44 @@ namespace TiTools_backend.Controllers
             }
             return NoContent();
         }
+
+        [HttpPut("/api/Equipment/updatestatus/{id}")]
+        public async Task<IActionResult> UpdateStatusEquipment(int id, bool equipmentStatus) 
+        {
+            var equipmentExists = await _context.Equipments.FindAsync(id);
+            if (equipmentExists == null)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = "Equipment not found"
+                    });
+            }
+
+            equipmentExists.EquipmentLoanStatus = equipmentStatus;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }catch (Exception ex)
+            {
+                if (!EquipmentExists(id))
+                {
+                    return StatusCode(StatusCodes.Status404NotFound,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = "Equipment not found"
+                    });
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return NoContent();
+        }
+
         private bool EquipmentExists(int id)
         {
             return _context.Equipments.Any(e => e.EquipmentId == id);
