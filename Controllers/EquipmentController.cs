@@ -174,6 +174,40 @@ namespace TiTools_backend.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEquipment(int id)
+        {
+            var equipment = await _context.Equipments.FindAsync(id);
+
+            if (equipment is null)
+            {
+                return BadRequest();
+            }
+
+            _context.Equipments.Remove(equipment);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }catch(Exception ex)
+            {
+                if (!EquipmentExists(id))
+                {
+                    return StatusCode(StatusCodes.Status404NotFound,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = "Equipment not found"
+                    });
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return Ok(equipment);
+        }
+
         private bool EquipmentExists(int id)
         {
             return _context.Equipments.Any(e => e.EquipmentId == id);
