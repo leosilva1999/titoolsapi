@@ -37,6 +37,18 @@ namespace TiTools_backend.Controllers
             return BadRequest();
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetEquipment(int id)
+        {
+            var equipment = await _context.Equipments.FindAsync(id);
+
+            if(equipment is null)
+            {
+                return BadRequest();
+            }
+            return Ok(equipment);
+        }
+
         [Authorize(policy: "UserOnly")]
         [HttpPost]
         public async Task<IActionResult> PostEquipment(Equipment model)
