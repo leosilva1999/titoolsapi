@@ -101,6 +101,7 @@ namespace TiTools_backend.Controllers
 
         }
 
+        [Authorize(Policy = "UserOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEquipment(int id, Equipment model) {
 
@@ -137,6 +138,7 @@ namespace TiTools_backend.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "UserOnly")]
         [HttpPut("/api/Equipment/updatestatus/{id}")]
         public async Task<IActionResult> UpdateStatusEquipment(int id, bool equipmentStatus) 
         {
@@ -174,6 +176,7 @@ namespace TiTools_backend.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "UserOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEquipment(int id)
         {
