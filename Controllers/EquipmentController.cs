@@ -22,7 +22,7 @@ namespace TiTools_backend.Controllers
         //get
 
         
-        [Authorize(Policy = "UserOnly")]
+        //[Authorize(Policy = "UserOnly")]
         [HttpGet]
         public async Task<IActionResult> GetEquipments()
         {
