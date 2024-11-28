@@ -67,11 +67,12 @@ namespace TiTools_backend.Controllers
                 {
                     Token = new JwtSecurityTokenHandler().WriteToken(token),
                     RefreshToken = refreshToken,
-                    Expiration = token.ValidTo
+                    Expiration = token.ValidTo,
+                    Errors = false
                 });
             }
 
-            return Unauthorized("Dados de acesso inválidos");
+            return Unauthorized(new { errors = "401", message = "Dados de acesso inválidos" });
         }
 
         [HttpPost]
@@ -169,7 +170,7 @@ namespace TiTools_backend.Controllers
             });
         }
 
-        [Authorize(Policy = "SuperAdminOnly")]
+        //[Authorize(Policy = "SuperAdminOnly")]
         [HttpPost]
         [Route("revoke/{useremail}")]
         public async Task<IActionResult> Revoke(string useremail)
@@ -177,7 +178,7 @@ namespace TiTools_backend.Controllers
             var user = await _userManager.FindByEmailAsync(useremail);
             if (user == null)
             {
-                return BadRequest("Invalid e-mail!");
+                return BadRequest(new { errors = "400", message =  "Invalid e-mail!" });
             }
 
             user.RefreshToken = null;
