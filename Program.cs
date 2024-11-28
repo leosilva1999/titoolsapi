@@ -8,7 +8,6 @@ using TiTools_backend.Context;
 using TiTools_backend.Models;
 using TiTools_backend.Services;
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -52,7 +51,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 var secretKey = builder.Configuration["JwtTest:SecretKey"]
     ?? throw new ArgumentException("Invalid secret key!!");
 
-<<<<<<< HEAD
+
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -64,16 +63,8 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
-=======
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy =>
-                      {
-                          policy.WithOrigins("http://localhost:5173");
-                      });
->>>>>>> origin/main
 });
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -132,11 +123,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-<<<<<<< HEAD
+
 app.UseCors(myAllowSpecificOrigins);
-=======
-app.UseCors(MyAllowSpecificOrigins);
->>>>>>> origin/main
 
 app.UseAuthorization();
 
