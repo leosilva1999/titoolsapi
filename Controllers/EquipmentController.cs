@@ -32,9 +32,13 @@ namespace TiTools_backend.Controllers
 
             if (equipmentList is not null)
             {
-                return Ok(equipmentList);
+                return Ok(new
+                {
+                    EquipmentList = equipmentList,
+                    Errors = false
+                });
             }
-            return BadRequest();
+            return BadRequest(new { errors = "400", message = "Falha na requisição" });
         }
 
         [HttpGet("{id}")]
