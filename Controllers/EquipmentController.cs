@@ -22,12 +22,13 @@ namespace TiTools_backend.Controllers
         //get
 
         
-        //[Authorize(Policy = "UserOnly")]
+        [Authorize(Policy = "UserOnly")]
         [HttpGet]
         public async Task<IActionResult> GetEquipments()
         {
             
                 var equipmentList = await _context.Equipments.ToListAsync();
+                var equipmentCount = await _context.Equipments.CountAsync();
 
 
             if (equipmentList is not null)
@@ -35,6 +36,7 @@ namespace TiTools_backend.Controllers
                 return Ok(new
                 {
                     EquipmentList = equipmentList,
+                    EquipmentCount = equipmentCount,
                     Errors = false
                 });
             }
@@ -98,7 +100,7 @@ namespace TiTools_backend.Controllers
                     new Response
                     {
                         Status = "Error",
-                        Message = $"User creation failed: {ex}"
+                        Message = $"Equipment creation failed: {ex}"
                     });
             }
 

@@ -119,13 +119,13 @@ namespace TiTools_backend.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "UserOnly")]
+        //[Authorize(Policy = "UserOnly")]
         [Route("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] TokenModelDTO tokenModel)
         {
             if (tokenModel == null)
             {
-                return BadRequest("Invalid client request!");
+                return BadRequest(new { errors = "400", message = "Invalid client request!" });
             }
 
             string? accessToken = tokenModel.AccessToken
@@ -137,14 +137,14 @@ namespace TiTools_backend.Controllers
 
             if (principal == null)
             {
-                return BadRequest("Invalid access token/refresh token");
+                return BadRequest(new { errors = "400", message = "Invalid access token/refresh token" });
             }
 
             string userName = principal.Identity.Name;
 
             if (userName is null)
             {
-                return BadRequest("Invalid access token/refresh token");
+                return BadRequest(new { errors = "400", message = "Invalid access token/refresh token" });
             }
 
             var user = await _userManager.FindByNameAsync(userName);
@@ -152,7 +152,7 @@ namespace TiTools_backend.Controllers
             if (user == null || user.RefreshToken != refreshToken
                             || user.RefreshTokenExpiryTime <= DateTime.Now)
             {
-                return BadRequest("Invalid access token/refresh token(user invalid)");
+                return BadRequest(new { errors = "400", message = "Invalid access token/refresh token(user invalid)" });
             }
 
             var newAccessToken = _tokenService.GenerateAccessToken(
@@ -166,7 +166,8 @@ namespace TiTools_backend.Controllers
             return new ObjectResult(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
-                refreshToken = newRefreshToken
+                refreshToken = newRefreshToken,
+                errors = "false"
             });
         }
 
