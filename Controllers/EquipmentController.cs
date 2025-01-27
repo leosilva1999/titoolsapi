@@ -24,10 +24,14 @@ namespace TiTools_backend.Controllers
         
         [Authorize(Policy = "UserOnly")]
         [HttpGet]
-        public async Task<IActionResult> GetEquipments()
+        public async Task<IActionResult> GetEquipments(int limit, int offset)
         {
             
-                var equipmentList = await _context.Equipments.ToListAsync();
+                var equipmentList = await _context.Equipments
+                    .OrderBy(x => x.EquipmentName)
+                    .Skip(offset)
+                    .Take(limit)
+                    .ToListAsync();
                 var equipmentCount = await _context.Equipments.CountAsync();
 
 
@@ -214,7 +218,12 @@ namespace TiTools_backend.Controllers
                     throw;
                 }
             }
-            return Ok(equipment);
+            return Ok(new
+            {
+                Equipment = equipment,
+                Status = "OK",
+                Message = "Equipment deleted"
+            });
         }
 
         private bool EquipmentExists(int id)
