@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TiTools_backend.Context;
+using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 
 namespace TiTools_backend.Controllers
@@ -75,12 +76,42 @@ namespace TiTools_backend.Controllers
 
         // POST: api/Loans
         [HttpPost]
-        public async Task<ActionResult<Loan>> PostLoan(Loan loan)
+        public async Task<ActionResult<Loan>> PostLoan([FromBody] LoanRequestDTO loanDTO)
         {
-            _context.Loans.Add(loan);
-            await _context.SaveChangesAsync();
+            Console.WriteLine(loanDTO);
+            var loan = new Loan
+            {
+                ApplicantName = loanDTO.ApplicantName,
+                RequestTime = loanDTO.RequestTime,
+                ReturnTime = loanDTO.ReturnTime,
+                Equipments =  await _context.Equipments
+                    .Where(e => loanDTO.EquipmentIds
+                        .Contains(e.EquipmentId))
+                    .ToListAsync(),
+            };
 
-            return CreatedAtAction("GetLoan", new { id = loan.LoanId }, loan);
+            try
+            {
+                await _context.AddAsync(loan);
+                await _context.SaveChangesAsync();
+                return StatusCode(StatusCodes.Status201Created,
+                    new Response
+                    {
+                        Status = "Created",
+                        Message = $"Loan created Successfuly"
+                    });
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = $"Loan creation failed: {ex}"
+                    });
+            }
         }
 
         // DELETE: api/Loans/5

@@ -24,6 +24,6 @@ namespace TiTools_backend.Models
         [Required(ErrorMessage = "O status do empréstimo do equipamento é obrigatório", AllowEmptyStrings = false)]
         public bool EquipmentLoanStatus { get; set; }
 
-        public List<Loan> Loans { get; } = [];
+        public List<Loan> Loans { get; set; } = [];
     }
 }
