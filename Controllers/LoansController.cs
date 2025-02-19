@@ -24,9 +24,26 @@ namespace TiTools_backend.Controllers
 
         // GET: api/Loans
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Loan>>> GetLoans()
+        public async Task<ActionResult<IEnumerable<Loan>>> GetLoans(int limit, int offset)
         {
-            return await _context.Loans.ToListAsync();
+            var loanList = await _context.Loans
+                    .OrderBy(x => x.LoanId)
+                    .Skip(offset)
+                    .Take(limit)
+                    .ToListAsync();
+            var loanCount = await _context.Loans.CountAsync();
+
+
+            if (loanList is not null)
+            {
+                return Ok(new
+                {
+                    LoanList = loanList,
+                    LoanCount = loanCount,
+                    Errors = false
+                });
+            }
+            return BadRequest(new { errors = "400", message = "Falha na requisição" });
         }
 
         // GET: api/Loans/5

@@ -15,7 +15,7 @@ namespace TiTools_backend.Models
         public string? ApplicantName { get; set; } 
 
         public DateTime RequestTime { get; set; }
-        public DateTime ReturnTime { get; set; }
+        public DateTime? ReturnTime { get; set; }
 
         public List<Equipment> Equipments { get; set; } = [];
 
