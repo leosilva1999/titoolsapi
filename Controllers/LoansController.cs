@@ -27,7 +27,7 @@ namespace TiTools_backend.Controllers
         public async Task<ActionResult<IEnumerable<Loan>>> GetLoans(int limit, int offset)
         {
             var loanList = await _context.Loans
-                    .OrderBy(x => x.LoanId)
+                    .OrderByDescending(x => x.RequestTime)
                     .Skip(offset)
                     .Take(limit)
                     .ToListAsync();
@@ -99,8 +99,10 @@ namespace TiTools_backend.Controllers
             var loan = new Loan
             {
                 ApplicantName = loanDTO.ApplicantName,
+                AuthorizedBy = loanDTO.AuthorizedBy,
                 RequestTime = loanDTO.RequestTime,
                 ReturnTime = loanDTO.ReturnTime,
+                LoanStatus = true,
                 Equipments =  await _context.Equipments
                     .Where(e => loanDTO.EquipmentIds
                         .Contains(e.EquipmentId))
