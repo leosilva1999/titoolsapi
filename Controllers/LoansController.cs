@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
+using TiTools_backend.Repositories;
 
 namespace TiTools_backend.Controllers
 {
@@ -16,21 +17,31 @@ namespace TiTools_backend.Controllers
     public class LoansController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILoanRepository _loanRepository;
 
-        public LoansController(AppDbContext context)
+        public LoansController(AppDbContext context, ILoanRepository loanRepository)
         {
             _context = context;
+            _loanRepository = loanRepository;
         }
 
         // GET: api/Loans
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Loan>>> GetLoans(int limit, int offset)
+        public async Task<ActionResult<IEnumerable<Loan>>> GetLoans(int limit, int offset, [FromQuery] LoanFilterDTO filter)
         {
-            var loanList = await _context.Loans
+            /*var loanList = await _context.Loans
+                    .OrderByDescending(x => x.RequestTime)
+                    .Skip(offset)
+
+                    .Take(limit)
+                    .ToListAsync();*/
+
+            var loanList = _loanRepository.GetLoansFiltered(filter)
                     .OrderByDescending(x => x.RequestTime)
                     .Skip(offset)
                     .Take(limit)
                     .ToListAsync();
+
             var loanCount = await _context.Loans.CountAsync();
 
 

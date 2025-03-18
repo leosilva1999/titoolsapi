@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using TiTools_backend.Context;
 using TiTools_backend.Models;
+using TiTools_backend.Repositories;
 using TiTools_backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -107,10 +108,12 @@ string? MySqlConnection = builder.Configuration.GetConnectionString("MySqlConnec
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(MySqlConnection, ServerVersion.AutoDetect(MySqlConnection))
+    options.UseMySql(MySqlConnection, ServerVersion.AutoDetect(MySqlConnection)),
+    ServiceLifetime.Transient
 );
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 
 var app = builder.Build();
 
