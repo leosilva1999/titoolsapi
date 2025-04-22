@@ -35,15 +35,15 @@ namespace TiTools_backend.Controllers
 
                     .Take(limit)
                     .ToListAsync();*/
+            var filteredQuery = _loanRepository.GetLoansFiltered(filter);
+            
+            var loanCount = await filteredQuery.CountAsync();
 
-            var loanList = _loanRepository.GetLoansFiltered(filter)
-                    .OrderByDescending(x => x.RequestTime)
+            var loanList = filteredQuery
                     .Skip(offset)
                     .Take(limit)
+                    .Include(l => l.Equipments)
                     .ToListAsync();
-
-            var loanCount = await _context.Loans.CountAsync();
-
 
             if (loanList is not null)
             {
@@ -158,6 +158,44 @@ namespace TiTools_backend.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpDelete("/api/Loans/deleteequipmentfromloan/{id}")]
+        public async Task<IActionResult> DeleteEquipmentFromLoan(int id)
+        {
+            var activeLoansWithThisEquipment = await _context.Loans
+                .Where(l => l.LoanStatus == true && l.Equipments
+                .Any(e => e.EquipmentId == id))
+                .FirstOrDefaultAsync();
+
+            var equipmentToRemove = await _context.Equipments.FindAsync(id);
+
+            try
+            {
+                if (activeLoansWithThisEquipment != null && equipmentToRemove != null)
+                {
+                    activeLoansWithThisEquipment.Equipments.Remove(equipmentToRemove);
+                    await _context.SaveChangesAsync();
+                    return NoContent();
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = $"Erro ao remover o equipamento"
+                    });
+                }
+            }catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = $"Erro ao remover o equipamento: {ex}"
+                    });
+            }
         }
 
         private bool LoanExists(int id)

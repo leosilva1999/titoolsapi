@@ -6,9 +6,11 @@ namespace TiTools_backend.DTOs
     {
         public string? ApplicantName { get; set; }
         public string? AuthorizedBy { get; set; }
-        public DateTime? RequestTime { get; set; }
-        public DateTime? ReturnTime { get; set; }
-        public bool LoanStatus { get; set; }
+        public DateTime? RequestTimeMin { get; set; }
+        public DateTime? RequestTimeMax { get; set; }
+        public DateTime? ReturnTimeMin { get; set; }
+        public DateTime? ReturnTimeMax { get; set; }
+        public bool? LoanStatus { get; set; }
         public bool OrderByDescending { get; set; }
     }
 }

@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
+using TiTools_backend.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TiTools_backend.Controllers
 {
@@ -13,10 +16,12 @@ namespace TiTools_backend.Controllers
     public class EquipmentController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IEquipmentRepository _equipmentRepository;
 
-        public EquipmentController(AppDbContext context)
+        public EquipmentController(AppDbContext context, IEquipmentRepository equipmentRepository)
         {
             _context = context;
+            _equipmentRepository = equipmentRepository;
         }
 
         //get
@@ -24,15 +29,18 @@ namespace TiTools_backend.Controllers
         
         [Authorize(Policy = "UserOnly")]
         [HttpGet]
-        public async Task<IActionResult> GetEquipments(int limit, int offset)
+        public async Task<IActionResult> GetEquipments(int limit, int offset, [FromQuery] EquipmentFilterDTO filter)
         {
-            
-                var equipmentList = await _context.Equipments
+            var filteredQuery = _equipmentRepository.GetEquipmentsFiltered(filter);
+
+            var equipmentCount = await filteredQuery.CountAsync();
+
+            var equipmentList = await filteredQuery
                     .OrderBy(x => x.EquipmentName)
                     .Skip(offset)
                     .Take(limit)
                     .ToListAsync();
-                var equipmentCount = await _context.Equipments.CountAsync();
+               
 
 
             if (equipmentList is not null)
@@ -149,39 +157,39 @@ namespace TiTools_backend.Controllers
         }
 
         [Authorize(Policy = "UserOnly")]
-        [HttpPut("/api/Equipment/updatestatus/{id}")]
-        public async Task<IActionResult> UpdateStatusEquipment(int id, bool equipmentStatus) 
+        [HttpPut("/api/Equipment/updatestatus")]
+        public async Task<IActionResult> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus) 
         {
-            var equipmentExists = await _context.Equipments.FindAsync(id);
-            if (equipmentExists == null)
+            var equipments = await _context.Equipments
+                .Where(e => EquipmentIds
+                .Contains(e.EquipmentId))
+                .ToListAsync();
+
+            if (equipments.Count != EquipmentIds.Count)
             {
                 return StatusCode(StatusCodes.Status400BadRequest,
                     new Response
                     {
                         Status = "Error",
-                        Message = "Equipment not found"
+                        Message = "One or more Equipments don't exist"
                     });
             }
 
-            equipmentExists.EquipmentLoanStatus = equipmentStatus;
+            foreach(var equipment in equipments)
+            {
+                equipment.EquipmentLoanStatus = equipmentStatus;
+            }
             try
             {
                 await _context.SaveChangesAsync();
             }catch (Exception ex)
             {
-                if (!EquipmentExists(id))
-                {
-                    return StatusCode(StatusCodes.Status404NotFound,
+                    return StatusCode(StatusCodes.Status500InternalServerError,
                     new Response
                     {
                         Status = "Error",
-                        Message = "Equipment not found"
+                        Message = "Failed to update equipment status: " + ex.Message
                     });
-                }
-                else
-                {
-                    throw;
-                }
             }
             return NoContent();
         }

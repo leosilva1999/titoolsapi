@@ -11,7 +11,7 @@ namespace TiTools_backend.DTOs
         public string? AuthorizedBy { get; set; }
 
         public DateTime RequestTime { get; set; }
-        public DateTime ReturnTime { get; set; }
+        public DateTime? ReturnTime { get; set; }
         public bool LoanStatus { get; set; }
 
         public List<int> EquipmentIds { get; set; } = [];

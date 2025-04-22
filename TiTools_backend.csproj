@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <Compile Remove="DTOs\Class.cs" />
+    <Compile Remove="Repositories\Class.cs" />
+    <Compile Remove="Repositories\Interface.cs" />
   </ItemGroup>
 
   <ItemGroup>

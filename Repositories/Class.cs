@@ -18,15 +18,15 @@ namespace TiTools_backend.Repositories
         {
             var query = _context.Loans.AsQueryable();
 
-            if (!string.IsNullOrEmpty(filter.ApplicantName))  
+            if (!string.IsNullOrEmpty(filter.ApplicantName))
                 query = query.Where(p => p.ApplicantName.Contains(filter.ApplicantName));
-            
+
             if (!string.IsNullOrEmpty(filter.AuthorizedBy))
                 query = query.Where(p => p.AuthorizedBy.Contains(filter.AuthorizedBy));
 
             if (filter.RequestTimeMin.HasValue)
                 query = query.Where(p => p.RequestTime >= filter.RequestTimeMin);
-            
+
             if (filter.RequestTimeMax.HasValue)
                 query = query.Where(p => p.RequestTime <= filter.RequestTimeMax);
 
@@ -38,7 +38,7 @@ namespace TiTools_backend.Repositories
 
             if (filter.LoanStatus.HasValue)
                 query = query.Where(p => p.LoanStatus == filter.LoanStatus.Value);
-            
+
             if (filter.OrderByDescending)
                 query = query.OrderByDescending(x => x.RequestTime);
 
