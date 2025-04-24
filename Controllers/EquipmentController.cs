@@ -121,19 +121,30 @@ namespace TiTools_backend.Controllers
 
         [Authorize(Policy = "UserOnly")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEquipment(int id, Equipment model) {
+        public async Task<IActionResult> PutEquipment(int id, [FromBody] EquipmentUpdateDTO updates) {
+            var entityToUpdate = await _context.Equipments
+                .FirstOrDefaultAsync(e => e.EquipmentId == id);
 
-            if (id != model.EquipmentId)
+            if (entityToUpdate == null) return NotFound();
+
+            var fieldsToUpdate = new List<string>();
+
+            if(updates.EquipmentName != null) fieldsToUpdate.Add("EquipmentName");
+            if(updates.IpAddress != null) fieldsToUpdate.Add("IpAddress");
+            if(updates.MacAddress != null) fieldsToUpdate.Add("MacAddress");
+            if(updates.EquipmentLoanStatus != null) fieldsToUpdate.Add("EquipmentLoanStatus");
+
+            foreach (var field in fieldsToUpdate)
             {
-                return StatusCode(StatusCodes.Status400BadRequest,
-                    new Response
-                    {
-                        Status = "Error",
-                        Message = "Equipment not found1"
-                    });
+                _context
+                    .Entry(entityToUpdate)
+                    .Property(field).CurrentValue = typeof(EquipmentUpdateDTO)
+                    .GetProperty(field)?
+                    .GetValue(updates);
+                _context
+                    .Entry(entityToUpdate)
+                    .Property(field).IsModified = true;
             }
-
-            _context.Entry(model).State = EntityState.Modified;
 
             try
             {

@@ -74,14 +74,59 @@ namespace TiTools_backend.Controllers
         // PUT: api/Loans/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLoan(int id, Loan loan)
+        public async Task<IActionResult> PutLoan(int id, [FromBody] LoanUpdateDTO updates)
         {
-            if (id != loan.LoanId)
-            {
-                return BadRequest();
+            var entityToUpdate = await _context.Loans
+                .Include(l => l.Equipments)
+                .FirstOrDefaultAsync(l => l.LoanId == id);
+
+            if (entityToUpdate == null) return NotFound();
+
+            var fieldsToUpdate = new List<string>();
+
+            if (updates.LoanStatus != null) fieldsToUpdate.Add("LoanStatus");
+            if (updates.ApplicantName != null) fieldsToUpdate.Add("applicantName");
+            if (updates.AuthorizedBy != null) fieldsToUpdate.Add("AuthorizedBy");
+            if (updates.RequestTime != null) fieldsToUpdate.Add("RequestTime");
+            if (updates.ReturnTime != null) fieldsToUpdate.Add("ReturnTime");
+
+            if (updates.EquipmentIds != null && updates.EquipmentIds.Any()) {
+                var existingEquipments = entityToUpdate.Equipments
+                    .ToList();
+
+                var newEquipments = await _context.Equipments
+                    .Where(e => updates.EquipmentIds
+                        .Contains(e.EquipmentId))
+                    .ToListAsync();
+
+                foreach(var equipment in existingEquipments)
+                {
+                    if(!newEquipments.Any(e => e.EquipmentId == equipment.EquipmentId))
+                    {
+                        entityToUpdate.Equipments.Remove(equipment);
+                    }
+                }
+
+                foreach(var equipment in newEquipments)
+                {
+                    if(!existingEquipments.Any(e => e.EquipmentId == equipment.EquipmentId)){
+                        entityToUpdate.Equipments.Add(equipment);
+                    }
+                }
+                
             }
 
-            _context.Entry(loan).State = EntityState.Modified;
+            foreach (var field in fieldsToUpdate)
+            {
+                _context
+                    .Entry(entityToUpdate)
+                    .Property(field).CurrentValue = typeof(LoanUpdateDTO)
+                    .GetProperty(field)?
+                    .GetValue(updates);
+                _context
+                    .Entry(entityToUpdate)
+                    .Property(field).IsModified = true;
+            }
 
             try
             {
