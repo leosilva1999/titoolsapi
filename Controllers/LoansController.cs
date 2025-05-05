@@ -85,7 +85,7 @@ namespace TiTools_backend.Controllers
             var fieldsToUpdate = new List<string>();
 
             if (updates.LoanStatus != null) fieldsToUpdate.Add("LoanStatus");
-            if (updates.ApplicantName != null) fieldsToUpdate.Add("applicantName");
+            if (updates.ApplicantName != null) fieldsToUpdate.Add("ApplicantName");
             if (updates.AuthorizedBy != null) fieldsToUpdate.Add("AuthorizedBy");
             if (updates.RequestTime != null) fieldsToUpdate.Add("RequestTime");
             if (updates.ReturnTime != null) fieldsToUpdate.Add("ReturnTime");
