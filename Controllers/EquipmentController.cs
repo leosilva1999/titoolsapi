@@ -56,9 +56,17 @@ namespace TiTools_backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetEquipment(int id)
+        public async Task<IActionResult> GetEquipmentWithLoans(int id)
         {
-            var equipment = await _context.Equipments.FindAsync(id);
+            var equipment = await _context.Equipments
+                .Where(e => e.EquipmentId == id)
+                .Select(e => new
+                {
+                    e.EquipmentId,
+                    e.EquipmentName,
+                    Loans = e.Loans.OrderByDescending(l => l.RequestTime).Select(l => new { l.ApplicantName, l.RequestTime, l.ReturnTime, l.LoanStatus })
+                })
+                .ToListAsync();
 
             if(equipment is null)
             {
@@ -168,7 +176,7 @@ namespace TiTools_backend.Controllers
         }
 
         [Authorize(Policy = "UserOnly")]
-        [HttpPut("/api/Equipment/updatestatus")]
+        [HttpPut("/api/Equipment/updatestatus/{equipmentStatus}")]
         public async Task<IActionResult> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus) 
         {
             var equipments = await _context.Equipments

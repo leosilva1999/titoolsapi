@@ -90,12 +90,12 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin", "SuperAmin"));
 
     options.AddPolicy("SuperAdminOnly", policy => 
         policy.RequireRole("Admin").RequireClaim("id", "Teste"));
 
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("user"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("user", "admin", "SuperAdmin"));
 
     options.AddPolicy("ExclusiveOnly",
         policy => policy.RequireAssertion(context =>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -28,6 +29,36 @@ namespace TiTools_backend.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
             _config = config;
+        }
+
+        [HttpGet]
+        //[Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetUsers(int limit, int offset)
+        {
+            var users = await _userManager.Users
+                .Select(u => new
+                {
+                    u.Id,
+                    u.UserName,
+                    u.Email
+                })
+                .OrderBy(u => u.UserName)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+
+            var usersCount =  await _userManager.Users.Skip(offset)
+                .Take(limit).CountAsync();
+
+            if (users is not null)
+            {
+                return Ok(new {
+                    users,
+                    usersCount
+                });
+            }
+            return BadRequest(new { errors = "400", message = "Falha na requisição" });
+            
         }
 
         [HttpPost]
@@ -237,7 +268,7 @@ namespace TiTools_backend.Controllers
         }
 
         [Authorize(Policy = "AdminOnly")]
-        [HttpPost]
+        [HttpDelete]
         [Route("RemoveUserFromRole")]
         public async Task<IActionResult> RemoveUserFromRole(string email, string roleName)
         {
@@ -253,6 +284,56 @@ namespace TiTools_backend.Controllers
                             Status = "Success",
                             Message = $"User {user.Email} removed from the {roleName} role"
                         });
+                }
+            }
+            return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User not found" });
+        }
+        
+        [Authorize(Policy = "AdminOnly")]
+        [HttpDelete]
+        [Route("RemoveUserFromAllRoles")]
+        public async Task<IActionResult> RemoveUserFromAllRoles(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var userRoles = await _userManager.GetRolesAsync(user);
+                var result = await _userManager.RemoveFromRolesAsync(user, userRoles);
+                if (result.Succeeded)
+                {
+                    return StatusCode(StatusCodes.Status200OK,
+                        new Response
+                        {
+                            Status = "Success",
+                            Message = $"User {user.Email} removed from all roles"
+                        });
+                }
+            }
+            return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User not found" });
+        }
+        
+        [Authorize(Policy = "AdminOnly")]
+        [HttpDelete]
+        [Route("DeleteUser")]
+        public async Task<IActionResult> DeleteUser(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var userRoles = await _userManager.GetRolesAsync(user);
+                var removeRoles = await _userManager.RemoveFromRolesAsync(user, userRoles);
+                if (removeRoles.Succeeded)
+                {
+                    var result = await _userManager.DeleteAsync(user);
+                    if (result.Succeeded)
+                    {
+                        return StatusCode(StatusCodes.Status200OK,
+                            new Response
+                            {
+                                Status = "Success",
+                                Message = $"User {user.Email} removed"
+                            });
+                    }
                 }
             }
             return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User not found" });

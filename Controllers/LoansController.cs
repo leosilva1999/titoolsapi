@@ -9,6 +9,7 @@ using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TiTools_backend.Controllers
 {
@@ -81,6 +82,15 @@ namespace TiTools_backend.Controllers
                 .FirstOrDefaultAsync(l => l.LoanId == id);
 
             if (entityToUpdate == null) return NotFound();
+            if (updates.ReturnTime < updates.RequestTime)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = $"A data de recebimento é menor que a data de empréstimo"
+                    });
+            }
 
             var fieldsToUpdate = new List<string>();
 
@@ -162,8 +172,18 @@ namespace TiTools_backend.Controllers
                 Equipments =  await _context.Equipments
                     .Where(e => loanDTO.EquipmentIds
                         .Contains(e.EquipmentId))
-                    .ToListAsync(),
+                .ToListAsync(),
             };
+
+            if (loan.ReturnTime < loan.RequestTime)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = $"A data de recebimento é menor que a data de empréstimo"
+                    });
+            }
 
             try
             {
@@ -205,15 +225,14 @@ namespace TiTools_backend.Controllers
             return NoContent();
         }
 
-        [HttpDelete("/api/Loans/deleteequipmentfromloan/{id}")]
-        public async Task<IActionResult> DeleteEquipmentFromLoan(int id)
+        [HttpPut("/api/Loans/deleteequipmentfromloan/{equipmentId}")]
+        public async Task<IActionResult> DeleteEquipmentFromLoan(int equipmentId)
         {
             var activeLoansWithThisEquipment = await _context.Loans
-                .Where(l => l.LoanStatus == true && l.Equipments
-                .Any(e => e.EquipmentId == id))
+                .Where(l => l.LoanStatus == true && l.Equipments.Any(e => e.EquipmentId == equipmentId))
                 .FirstOrDefaultAsync();
 
-            var equipmentToRemove = await _context.Equipments.FindAsync(id);
+            var equipmentToRemove = await _context.Equipments.FindAsync(equipmentId);
 
             try
             {
