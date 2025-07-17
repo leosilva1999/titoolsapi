@@ -10,6 +10,7 @@ using TiTools_backend.Models;
 using TiTools_backend.Services;
 using System.Linq;
 using TiTools_backend.Context;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TiTools_backend.Controllers
 {
@@ -166,6 +167,68 @@ namespace TiTools_backend.Controllers
                 {
                     Status = "Success",
                     Message = "User created successfully!"
+                });
+        }
+        [HttpPut]
+        [Route("updateUser")]
+        public async Task<IActionResult> UpdateUser(string Id, [FromBody] UpdateUserDTO updates)
+        {
+            var user = await _userManager.FindByIdAsync(Id!);
+
+            if (user == null)
+            {
+                return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = "User not found!"
+                    });
+            }
+
+            if (updates.Username != null)
+            {
+                user.UserName = updates.Username;
+            }
+            ;
+            if (updates.Email != null)
+            {
+                user.Email = updates.Email;
+            }
+            if (updates.Password != null)
+            {
+                var removePassword = await _userManager.RemovePasswordAsync(user);
+                var addPassword = await _userManager.AddPasswordAsync(user, updates.Password);
+                if (!addPassword.Succeeded)
+                {
+                    return StatusCode(
+                   StatusCodes.Status400BadRequest,
+                   new Response
+                   {
+                       Status = "Error",
+                       Message = "Senha muito fraca, utilize letras maíúsculas e símbolos(@, #, %...)"
+                   });
+                }
+            }
+
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = "User update failed."
+                    });
+            }
+            return Ok(
+                new Response
+                {
+                    Status = "Success",
+                    Message = "User update successfully!"
                 });
         }
 
