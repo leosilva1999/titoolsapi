@@ -8,6 +8,8 @@ using System.Security.Claims;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Services;
+using System.Linq;
+using TiTools_backend.Context;
 
 namespace TiTools_backend.Controllers
 {
@@ -16,16 +18,19 @@ namespace TiTools_backend.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ITokenService _tokenService;
+        private readonly AppDbContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _config;
 
         public AuthController(ITokenService tokenService,
+            AppDbContext dbContext,
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IConfiguration config)
         {
             _tokenService = tokenService;
+            _dbContext = dbContext;
             _userManager = userManager;
             _roleManager = roleManager;
             _config = config;
@@ -33,9 +38,24 @@ namespace TiTools_backend.Controllers
 
         [HttpGet]
         //[Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetUsers(int limit, int offset)
+        public async Task<IActionResult> GetUsers(int limit, int offset, [FromQuery] UserFilterDTO filter)
         {
-            var users = await _userManager.Users
+            var query = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(filter.UserName))
+                query = query.Where(p => p.UserName.Contains(filter.UserName));
+            if (!string.IsNullOrEmpty(filter.Email))
+                query = query.Where(p => p.Email.Contains(filter.Email));
+            if (!string.IsNullOrEmpty(filter.Role))
+            {
+                var usersInRole = await _userManager.GetUsersInRoleAsync(filter.Role);
+                var userIds = usersInRole.Select(u => u.Id).ToList();
+
+                query = query.Where(u => userIds.Contains(u.Id));
+            }
+                
+
+            var users = await query
                 .Select(u => new
                 {
                     u.Id,
@@ -47,7 +67,7 @@ namespace TiTools_backend.Controllers
                 .Take(limit)
                 .ToListAsync();
 
-            var usersCount =  await _userManager.Users.Skip(offset)
+            var usersCount =  await query.Skip(offset)
                 .Take(limit).CountAsync();
 
             if (users is not null)
