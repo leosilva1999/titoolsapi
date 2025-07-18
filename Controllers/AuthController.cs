@@ -41,12 +41,12 @@ namespace TiTools_backend.Controllers
         //[Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetUsers(int limit, int offset, [FromQuery] UserFilterDTO filter)
         {
-            var query = _userManager.Users.AsQueryable();
+            var query = _dbContext.Users.AsQueryable();
 
             if (!string.IsNullOrEmpty(filter.UserName))
-                query = query.Where(p => p.UserName.Contains(filter.UserName));
+                query = query.Where(u => u.UserName.Contains(filter.UserName));
             if (!string.IsNullOrEmpty(filter.Email))
-                query = query.Where(p => p.Email.Contains(filter.Email));
+                query = query.Where(u => u.Email.Contains(filter.Email));
             if (!string.IsNullOrEmpty(filter.Role))
             {
                 var usersInRole = await _userManager.GetUsersInRoleAsync(filter.Role);
@@ -61,7 +61,14 @@ namespace TiTools_backend.Controllers
                 {
                     u.Id,
                     u.UserName,
-                    u.Email
+                    u.Email,
+                    Roles = _dbContext.UserRoles
+                        .Where(ur => ur.UserId == u.Id)
+                        .Join(_dbContext.Roles,
+                            ur => ur.RoleId,
+                            r => r.Id,
+                            (ur, r) => r.Name)
+                        .ToList()
                 })
                 .OrderBy(u => u.UserName)
                 .Skip(offset)
