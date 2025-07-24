@@ -11,6 +11,8 @@ using TiTools_backend.Services;
 using System.Linq;
 using TiTools_backend.Context;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Collections.Generic;
+using Microsoft.IdentityModel.Tokens;
 
 namespace TiTools_backend.Controllers
 {
@@ -309,6 +311,37 @@ namespace TiTools_backend.Controllers
 
             return NoContent();
 
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpGet]
+        [Route("GetRole")]
+        public async Task<IActionResult> GetRole(int limit, int offset)
+        {
+
+            var roles = await _roleManager.Roles.Select(r => new
+            {
+                r.Id,
+                r.Name,
+             
+            })
+                .OrderBy(r => r.Name)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+
+            if (!roles.IsNullOrEmpty())
+                {
+                return Ok(new
+                {
+                    roles
+                });
+            }
+                else
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest,
+                        new Response { Status = "Error", Message = $"Get Roles failed" });
+                }
         }
 
         [Authorize(Policy = "SuperAdminOnly")]
