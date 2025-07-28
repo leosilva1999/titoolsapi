@@ -69,7 +69,7 @@ namespace TiTools_backend.Controllers
                         .Join(_dbContext.Roles,
                             ur => ur.RoleId,
                             r => r.Id,
-                            (ur, r) => r.Name)
+                            (ur, r) => new { r.Id, r.Name })
                         .ToList()
                 })
                 .OrderBy(u => u.UserName)
@@ -179,6 +179,7 @@ namespace TiTools_backend.Controllers
                 });
         }
         [HttpPut]
+        [Authorize(Policy = "AdminOnly")]
         [Route("updateUser")]
         public async Task<IActionResult> UpdateUser(string Id, [FromBody] UpdateUserDTO updates)
         {
@@ -315,8 +316,8 @@ namespace TiTools_backend.Controllers
 
         [Authorize(Policy = "AdminOnly")]
         [HttpGet]
-        [Route("GetRole")]
-        public async Task<IActionResult> GetRole(int limit, int offset)
+        [Route("getRoles")]
+        public async Task<IActionResult> getRoles(int limit, int offset)
         {
 
             var roles = await _roleManager.Roles.Select(r => new
