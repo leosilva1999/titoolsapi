@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TiTools_backend.Services
 {
@@ -45,6 +47,37 @@ namespace TiTools_backend.Services
                 })
                 .ToListAsync();
             return equipment ;
+        }
+
+        public async Task<Equipment> PostEquipment(Equipment model)
+        {
+            try
+            {
+                var equipmentExists = await _context.Equipments.FindAsync(model.EquipmentId);
+
+                if (equipmentExists is not null)
+                {
+                    throw new InvalidOperationException("Equipment already exists!");
+                }
+
+                Equipment equipment = new()
+                {
+                    EquipmentName = model.EquipmentName,
+                    IpAddress = model.IpAddress,
+                    MacAddress = model.MacAddress,
+                    QrCode = model.QrCode,
+                    EquipmentLoanStatus = model.EquipmentLoanStatus,
+                };
+                
+                await _context.AddAsync(equipment);
+                await _context.SaveChangesAsync();
+
+                return equipment;
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

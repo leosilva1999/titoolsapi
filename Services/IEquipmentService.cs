@@ -1,4 +1,5 @@
-﻿using TiTools_backend.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
+using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 
 namespace TiTools_backend.Services
@@ -7,5 +8,6 @@ namespace TiTools_backend.Services
     {
         Task<(IEnumerable<Equipment> List, int Count)> GetEquipmentsAsync(int limit, int offset, EquipmentFilterDTO filter);
         Task<IEnumerable<object>> GetEquipmentWithLoans(int id);
+        Task<Equipment> PostEquipment(Equipment model);
     }
 }

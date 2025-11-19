@@ -87,7 +87,7 @@ namespace TiTools_backend.Controllers
         [HttpPost]
         public async Task<IActionResult> PostEquipment(Equipment model)
         {
-            var equipmentExists = await _context.Equipments.FindAsync(model.EquipmentId);
+            /*var equipmentExists = await _context.Equipments.FindAsync(model.EquipmentId);
 
             if (equipmentExists is not null)
             {
@@ -130,9 +130,25 @@ namespace TiTools_backend.Controllers
                         Status = "Error",
                         Message = $"Equipment creation failed: {ex}"
                     });
+            }*/
+            try
+            {
+                var result = await _equipmentService.PostEquipment(model);
+
+                return StatusCode(
+                    StatusCodes.Status201Created, new Response
+                {
+                    Status = "Created",
+                    Message = $"Equipment {model.EquipmentName} created Successfuly",
+                    Return = result
+                });
+            }catch(Exception ex)
+            {
+                return Problem(
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
             }
-
-
         }
 
         [Authorize(Policy = "UserOnly")]
