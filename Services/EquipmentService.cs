@@ -79,5 +79,52 @@ namespace TiTools_backend.Services
                 throw;
             }
         }
+
+        public async Task<EquipmentUpdateDTO> PutEquipment(int id, EquipmentUpdateDTO updates)
+        {
+            try
+            {
+                var entityToUpdate = await _context.Equipments
+                .FirstOrDefaultAsync(e => e.EquipmentId == id);
+
+                if (entityToUpdate == null) throw new InvalidOperationException("Equipment not found!"); ;
+
+                var fieldsToUpdate = new List<string>();
+
+                if (updates.EquipmentName != null) fieldsToUpdate.Add("EquipmentName");
+                if (updates.IpAddress != null) fieldsToUpdate.Add("IpAddress");
+                if (updates.MacAddress != null) fieldsToUpdate.Add("MacAddress");
+                if (updates.EquipmentLoanStatus != null) fieldsToUpdate.Add("EquipmentLoanStatus");
+
+                foreach (var field in fieldsToUpdate)
+                {
+                    _context
+                        .Entry(entityToUpdate)
+                        .Property(field).CurrentValue = typeof(EquipmentUpdateDTO)
+                        .GetProperty(field)?
+                        .GetValue(updates);
+                    _context
+                        .Entry(entityToUpdate)
+                        .Property(field).IsModified = true;
+                }
+
+                    await _context.SaveChangesAsync();
+
+                    if (!EquipmentExists(id))
+                    {
+                        throw new KeyNotFoundException("Equipment not found");
+                    }
+
+                return updates;
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+        }
+        private bool EquipmentExists(int id)
+        {
+            return _context.Equipments.Any(e => e.EquipmentId == id);
+        }
     }
 }

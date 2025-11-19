@@ -9,6 +9,7 @@ using TiTools_backend.Services;
 using TiTools_backend.Models;
 using TiTools_backend.Repositories;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace TiTools_backend.Controllers
 {
@@ -154,7 +155,7 @@ namespace TiTools_backend.Controllers
         [Authorize(Policy = "UserOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEquipment(int id, [FromBody] EquipmentUpdateDTO updates) {
-            var entityToUpdate = await _context.Equipments
+            /*var entityToUpdate = await _context.Equipments
                 .FirstOrDefaultAsync(e => e.EquipmentId == id);
 
             if (entityToUpdate == null) return NotFound();
@@ -196,7 +197,21 @@ namespace TiTools_backend.Controllers
                     throw;
                 }
             }
-            return NoContent();
+            return NoContent();*/
+
+            try
+            {
+                var result = await _equipmentService.PutEquipment(id, updates);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
+            }
         }
 
         [Authorize(Policy = "UserOnly")]

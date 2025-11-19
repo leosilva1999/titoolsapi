@@ -9,5 +9,7 @@ namespace TiTools_backend.Services
         Task<(IEnumerable<Equipment> List, int Count)> GetEquipmentsAsync(int limit, int offset, EquipmentFilterDTO filter);
         Task<IEnumerable<object>> GetEquipmentWithLoans(int id);
         Task<Equipment> PostEquipment(Equipment model);
+        Task<EquipmentUpdateDTO> PutEquipment(int id, EquipmentUpdateDTO updates);
+
     }
 }
