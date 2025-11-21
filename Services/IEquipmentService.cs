@@ -10,6 +10,7 @@ namespace TiTools_backend.Services
         Task<IEnumerable<object>> GetEquipmentWithLoans(int id);
         Task<Equipment> PostEquipment(Equipment model);
         Task<EquipmentUpdateDTO> PutEquipment(int id, EquipmentUpdateDTO updates);
+        Task<IEnumerable<Equipment>> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus);
 
     }
 }

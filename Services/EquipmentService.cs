@@ -122,6 +122,33 @@ namespace TiTools_backend.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Equipment>> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus)
+        {
+            try
+            {
+                var equipments = await _context.Equipments
+                .Where(e => EquipmentIds
+                .Contains(e.EquipmentId))
+                .ToListAsync();
+
+                if (equipments.Count != EquipmentIds.Count) 
+                    throw new InvalidOperationException("One or more Equipments don't exist");
+
+                foreach (var equipment in equipments)
+                {
+                    equipment.EquipmentLoanStatus = equipmentStatus;
+                }
+                
+                await _context.SaveChangesAsync();
+                
+                return equipments;
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+        }
         private bool EquipmentExists(int id)
         {
             return _context.Equipments.Any(e => e.EquipmentId == id);

@@ -218,7 +218,7 @@ namespace TiTools_backend.Controllers
         [HttpPut("/api/Equipment/updatestatus/{equipmentStatus}")]
         public async Task<IActionResult> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus) 
         {
-            var equipments = await _context.Equipments
+            /*var equipments = await _context.Equipments
                 .Where(e => EquipmentIds
                 .Contains(e.EquipmentId))
                 .ToListAsync();
@@ -249,7 +249,21 @@ namespace TiTools_backend.Controllers
                         Message = "Failed to update equipment status: " + ex.Message
                     });
             }
-            return NoContent();
+            return NoContent();*/
+
+            try
+            {
+                await _equipmentService.UpdateStatusEquipment(EquipmentIds, equipmentStatus);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
+            }
         }
 
         [Authorize(Policy = "UserOnly")]
