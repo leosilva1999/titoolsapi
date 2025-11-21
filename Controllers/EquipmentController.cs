@@ -143,7 +143,12 @@ namespace TiTools_backend.Controllers
                     Message = $"Equipment {model.EquipmentName} created Successfuly",
                     Return = result
                 });
-            }catch(Exception ex)
+            }
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
+            catch (Exception ex)
             {
                 return Problem(
                     detail: ex.Message,
@@ -205,6 +210,14 @@ namespace TiTools_backend.Controllers
 
                 return NoContent();
             }
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
+            catch (KeyNotFoundException knfex)
+            {
+                return BadRequest(new { message = knfex.Message });
+            }
             catch (Exception ex)
             {
                 return Problem(
@@ -257,6 +270,10 @@ namespace TiTools_backend.Controllers
 
                 return NoContent();
             }
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
             catch (Exception ex)
             {
                 return Problem(
@@ -270,7 +287,7 @@ namespace TiTools_backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEquipment(int id)
         {
-            var equipment = await _context.Equipments.FindAsync(id);
+            /*var equipment = await _context.Equipments.FindAsync(id);
 
             if (equipment is null)
             {
@@ -303,7 +320,30 @@ namespace TiTools_backend.Controllers
                 Equipment = equipment,
                 Status = "OK",
                 Message = "Equipment deleted"
-            });
+            });*/
+
+            try
+            {
+                var response = await _equipmentService.DeleteEquipment(id);
+
+                return Ok(new
+                {
+                    Equipment = response,
+                    Status = "OK",
+                    Message = "Equipment deleted"
+                });
+            }
+            catch(InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
+            }
         }
 
         private bool EquipmentExists(int id)

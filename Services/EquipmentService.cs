@@ -37,16 +37,22 @@ namespace TiTools_backend.Services
 
         public async Task<IEnumerable<object>> GetEquipmentWithLoans(int id)
         {
-            var equipment = await _context.Equipments
-                .Where(e => e.EquipmentId == id)
-                .Select(e => new
-                {
-                    e.EquipmentId,
-                    e.EquipmentName,
-                    Loans = e.Loans.OrderByDescending(l => l.RequestTime).Select(l => new { l.ApplicantName, l.RequestTime, l.ReturnTime, l.LoanStatus })
-                })
-                .ToListAsync();
-            return equipment ;
+            try
+            {
+                var equipment = await _context.Equipments
+                    .Where(e => e.EquipmentId == id)
+                    .Select(e => new
+                    {
+                        e.EquipmentId,
+                        e.EquipmentName,
+                        Loans = e.Loans.OrderByDescending(l => l.RequestTime).Select(l => new { l.ApplicantName, l.RequestTime, l.ReturnTime, l.LoanStatus })
+                    })
+                    .ToListAsync();
+                return equipment ;
+            }catch(Exception ex)
+            {
+                throw;
+            }
         }
 
         public async Task<Equipment> PostEquipment(Equipment model)
@@ -149,6 +155,33 @@ namespace TiTools_backend.Services
                 throw;
             }
         }
+
+        public async Task<Equipment> DeleteEquipment(int id)
+        {
+            try
+            {
+                var equipment = await _context.Equipments.FindAsync(id);
+
+                if (equipment is null)
+                    throw new InvalidOperationException("Equipment not found");
+
+                _context.Equipments.Remove(equipment);
+
+                
+                await _context.SaveChangesAsync();
+                
+                
+                    if (!EquipmentExists(id))
+                        throw new InvalidOperationException("Equipment not found");
+
+                return equipment;
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+        }
+
         private bool EquipmentExists(int id)
         {
             return _context.Equipments.Any(e => e.EquipmentId == id);

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TiTools_backend.DTOs;
+﻿using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 
 namespace TiTools_backend.Services
@@ -11,6 +10,7 @@ namespace TiTools_backend.Services
         Task<Equipment> PostEquipment(Equipment model);
         Task<EquipmentUpdateDTO> PutEquipment(int id, EquipmentUpdateDTO updates);
         Task<IEnumerable<Equipment>> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus);
+        Task<Equipment> DeleteEquipment(int id);
 
     }
 }
