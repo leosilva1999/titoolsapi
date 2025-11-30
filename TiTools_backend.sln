@@ -4,11 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiTools_backend", "TiTools_backend.csproj", "{173EFC74-0B40-42A6-AAB3-6D0EBC8E9315}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiTools_backend.Tests", "..\TiTools_backend.Tests\TiTools_backend.Tests.csproj", "{37F6A843-915A-4896-BA57-E9F209DC7321}"
 	ProjectSection(ProjectDependencies) = postProject
-		{173EFC74-0B40-42A6-AAB3-6D0EBC8E9315} = {173EFC74-0B40-42A6-AAB3-6D0EBC8E9315}
+		{9C75EE47-C33C-7B05-857C-741541087D44} = {9C75EE47-C33C-7B05-857C-741541087D44}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiTools_backend.Tests", "TiTools_backend.Tests\TiTools_backend.Tests.csproj", "{9C75EE47-C33C-7B05-857C-741541087D44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,10 +20,10 @@ Global
 		{173EFC74-0B40-42A6-AAB3-6D0EBC8E9315}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{173EFC74-0B40-42A6-AAB3-6D0EBC8E9315}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{173EFC74-0B40-42A6-AAB3-6D0EBC8E9315}.Release|Any CPU.Build.0 = Release|Any CPU
-		{37F6A843-915A-4896-BA57-E9F209DC7321}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{37F6A843-915A-4896-BA57-E9F209DC7321}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{37F6A843-915A-4896-BA57-E9F209DC7321}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{37F6A843-915A-4896-BA57-E9F209DC7321}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C75EE47-C33C-7B05-857C-741541087D44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C75EE47-C33C-7B05-857C-741541087D44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C75EE47-C33C-7B05-857C-741541087D44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C75EE47-C33C-7B05-857C-741541087D44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

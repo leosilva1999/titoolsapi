@@ -25,7 +25,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\titoolsapi\TiTools_backend.csproj" />
+		<ProjectReference Include="..\TiTools_backend.csproj" />
 	</ItemGroup>
 
 </Project>
