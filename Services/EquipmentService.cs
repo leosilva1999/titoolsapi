@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.EntityFrameworkCore;
 using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Repositories;
-using Microsoft.AspNetCore.Mvc;
 
 namespace TiTools_backend.Services
 {
@@ -35,7 +32,7 @@ namespace TiTools_backend.Services
             return (equipmentList, equipmentCount);
         }
 
-        public async Task<IEnumerable<object>> GetEquipmentWithLoans(int id)
+        public async Task<IEnumerable<object>> GetEquipmentWithLoansAsync(int id)
         {
             try
             {
@@ -48,14 +45,19 @@ namespace TiTools_backend.Services
                         Loans = e.Loans.OrderByDescending(l => l.RequestTime).Select(l => new { l.ApplicantName, l.RequestTime, l.ReturnTime, l.LoanStatus })
                     })
                     .ToListAsync();
-                return equipment ;
+
+
+                if (equipment.Count()  == 0)
+                    throw new InvalidOperationException("Equipment not found!");
+
+                return equipment;
             }catch(Exception ex)
             {
                 throw;
             }
         }
 
-        public async Task<Equipment> PostEquipment(Equipment model)
+        public async Task<Equipment> PostEquipmentAsync(Equipment model)
         {
             try
             {
@@ -86,7 +88,7 @@ namespace TiTools_backend.Services
             }
         }
 
-        public async Task<EquipmentUpdateDTO> PutEquipment(int id, EquipmentUpdateDTO updates)
+        public async Task<EquipmentUpdateDTO> PutEquipmentAsync(int id, EquipmentUpdateDTO updates)
         {
             try
             {
@@ -129,7 +131,7 @@ namespace TiTools_backend.Services
             }
         }
 
-        public async Task<IEnumerable<Equipment>> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus)
+        public async Task<IEnumerable<Equipment>> UpdateStatusEquipmentAsync(List<int> EquipmentIds, bool equipmentStatus)
         {
             try
             {
@@ -156,7 +158,7 @@ namespace TiTools_backend.Services
             }
         }
 
-        public async Task<Equipment> DeleteEquipment(int id)
+        public async Task<Equipment> DeleteEquipmentAsync(int id)
         {
             try
             {

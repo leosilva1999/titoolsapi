@@ -1,15 +1,8 @@
-﻿using Humanizer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Services;
 using TiTools_backend.Models;
-using TiTools_backend.Repositories;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace TiTools_backend.Controllers
 {
@@ -29,7 +22,7 @@ namespace TiTools_backend.Controllers
         
         [Authorize(Policy = "UserOnly")]
         [HttpGet]
-        public async Task<IActionResult> GetEquipments(int limit, int offset, [FromQuery] EquipmentFilterDTO filter)
+        public async Task<IActionResult> GetEquipmentsAsync(int limit, int offset, [FromQuery] EquipmentFilterDTO filter)
         {
             var (equipmentList, equipmentCount) = await _equipmentService.GetEquipmentsAsync(limit, offset, filter);
 
@@ -49,27 +42,35 @@ namespace TiTools_backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetEquipmentWithLoans(int id)
+        public async Task<IActionResult> GetEquipmentWithLoansAsync(int id)
         {
-            var equipment = await _equipmentService.GetEquipmentWithLoans(id);
-
-            if (equipment is null)
+            try
             {
-                return BadRequest();
+                var equipment = await _equipmentService.GetEquipmentWithLoansAsync(id);
+
+                return Ok(equipment);
             }
-            return Ok(equipment);
+            catch(InvalidOperationException ioex)
+            {
+                    return BadRequest(new { message = ioex.Message });
+            }
+            catch (Exception ex) {
+                return Problem(
+                   detail: ex.Message,
+                   statusCode: StatusCodes.Status500InternalServerError
+                   );
+            }
         }
 
         [Authorize(policy: "UserOnly")]
         [HttpPost]
-        public async Task<IActionResult> PostEquipment(Equipment model)
+        public async Task<IActionResult> PostEquipmentAsync(Equipment model)
         {
             try
             {
-                var result = await _equipmentService.PostEquipment(model);
+                var result = await _equipmentService.PostEquipmentAsync(model);
 
-                return StatusCode(
-                    StatusCodes.Status201Created, new Response
+                return CreatedAtAction(nameof(PostEquipmentAsync), new { id = result.EquipmentId }, new Response
                 {
                     Status = "Created",
                     Message = $"Equipment {model.EquipmentName} created Successfuly",
@@ -91,10 +92,10 @@ namespace TiTools_backend.Controllers
 
         [Authorize(Policy = "UserOnly")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEquipment(int id, [FromBody] EquipmentUpdateDTO updates) {
+        public async Task<IActionResult> PutEquipmentAsync(int id, [FromBody] EquipmentUpdateDTO updates) {
             try
             {
-                var result = await _equipmentService.PutEquipment(id, updates);
+                var result = await _equipmentService.PutEquipmentAsync(id, updates);
 
                 return NoContent();
             }
@@ -117,11 +118,11 @@ namespace TiTools_backend.Controllers
 
         [Authorize(Policy = "UserOnly")]
         [HttpPut("/api/Equipment/updatestatus/{equipmentStatus}")]
-        public async Task<IActionResult> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus) 
+        public async Task<IActionResult> UpdateStatusEquipmentAsync(List<int> EquipmentIds, bool equipmentStatus) 
         {
             try
             {
-                await _equipmentService.UpdateStatusEquipment(EquipmentIds, equipmentStatus);
+                await _equipmentService.UpdateStatusEquipmentAsync(EquipmentIds, equipmentStatus);
 
                 return NoContent();
             }
@@ -140,15 +141,15 @@ namespace TiTools_backend.Controllers
 
         [Authorize(Policy = "UserOnly")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEquipment(int id)
+        public async Task<IActionResult> DeleteEquipmentAsync(int id)
         {
             try
             {
-                var response = await _equipmentService.DeleteEquipment(id);
+                var response = await _equipmentService.DeleteEquipmentAsync(id);
 
-                return Ok(new
+                return Ok(new Response
                 {
-                    Equipment = response,
+                    Return = response,
                     Status = "OK",
                     Message = "Equipment deleted"
                 });

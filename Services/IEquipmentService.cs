@@ -6,11 +6,11 @@ namespace TiTools_backend.Services
     public interface IEquipmentService
     {
         Task<(IEnumerable<Equipment> List, int Count)> GetEquipmentsAsync(int limit, int offset, EquipmentFilterDTO filter);
-        Task<IEnumerable<object>> GetEquipmentWithLoans(int id);
-        Task<Equipment> PostEquipment(Equipment model);
-        Task<EquipmentUpdateDTO> PutEquipment(int id, EquipmentUpdateDTO updates);
-        Task<IEnumerable<Equipment>> UpdateStatusEquipment(List<int> EquipmentIds, bool equipmentStatus);
-        Task<Equipment> DeleteEquipment(int id);
+        Task<IEnumerable<object>> GetEquipmentWithLoansAsync(int id);
+        Task<Equipment> PostEquipmentAsync(Equipment model);
+        Task<EquipmentUpdateDTO> PutEquipmentAsync(int id, EquipmentUpdateDTO updates);
+        Task<IEnumerable<Equipment>> UpdateStatusEquipmentAsync(List<int> EquipmentIds, bool equipmentStatus);
+        Task<Equipment> DeleteEquipmentAsync(int id);
 
     }
 }
