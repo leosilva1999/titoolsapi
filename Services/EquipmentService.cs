@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TiTools_backend.Context;
+﻿using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Repositories;
@@ -19,39 +18,21 @@ namespace TiTools_backend.Services
 
         public async Task<(IEnumerable<Equipment> List, int Count)> GetEquipmentsAsync(int limit, int offset, EquipmentFilterDTO filter)
         {
-            var filteredQuery = _equipmentRepository.GetEquipmentsFiltered(filter);
-
-            var equipmentCount = await filteredQuery.CountAsync();
-
-            var equipmentList = await filteredQuery
-                    .OrderBy(x => x.EquipmentName)
-                    .Skip(offset)
-                    .Take(limit)
-                    .ToListAsync();
-
-            return (equipmentList, equipmentCount);
-        }
+            try { 
+                return await _equipmentRepository.GetEquipmentsAsync(limit, offset, filter);
+            }catch(Exception ex)
+            {
+                throw;
+            }
+}
 
         public async Task<IEnumerable<object>> GetEquipmentWithLoansAsync(int id)
         {
             try
             {
-                var equipment = await _context.Equipments
-                    .Where(e => e.EquipmentId == id)
-                    .Select(e => new
-                    {
-                        e.EquipmentId,
-                        e.EquipmentName,
-                        Loans = e.Loans.OrderByDescending(l => l.RequestTime).Select(l => new { l.ApplicantName, l.RequestTime, l.ReturnTime, l.LoanStatus })
-                    })
-                    .ToListAsync();
-
-
-                if (equipment.Count()  == 0)
-                    throw new InvalidOperationException("Equipment not found!");
-
-                return equipment;
-            }catch(Exception ex)
+                return await _equipmentRepository.GetEquipmentWithLoansAsync(id);
+            }
+            catch(Exception ex)
             {
                 throw;
             }
@@ -61,29 +42,10 @@ namespace TiTools_backend.Services
         {
             try
             {
-                var equipmentExists = await _context.Equipments.FindAsync(model.EquipmentId);
-
-                if (equipmentExists is not null)
-                {
-                    throw new InvalidOperationException("Equipment already exists!");
-                }
-
-                Equipment equipment = new()
-                {
-                    EquipmentName = model.EquipmentName,
-                    IpAddress = model.IpAddress,
-                    MacAddress = model.MacAddress,
-                    QrCode = model.QrCode,
-                    EquipmentLoanStatus = model.EquipmentLoanStatus,
-                };
-                
-                await _context.AddAsync(equipment);
-                await _context.SaveChangesAsync();
-
-                return equipment;
+                return await _equipmentRepository.PostEquipmentAsync(model);
             }
             catch(Exception ex)
-            {
+            {           
                 throw;
             }
         }
@@ -92,38 +54,7 @@ namespace TiTools_backend.Services
         {
             try
             {
-                var entityToUpdate = await _context.Equipments
-                .FirstOrDefaultAsync(e => e.EquipmentId == id);
-
-                if (entityToUpdate == null) throw new InvalidOperationException("Equipment not found!"); ;
-
-                var fieldsToUpdate = new List<string>();
-
-                if (updates.EquipmentName != null) fieldsToUpdate.Add("EquipmentName");
-                if (updates.IpAddress != null) fieldsToUpdate.Add("IpAddress");
-                if (updates.MacAddress != null) fieldsToUpdate.Add("MacAddress");
-                if (updates.EquipmentLoanStatus != null) fieldsToUpdate.Add("EquipmentLoanStatus");
-
-                foreach (var field in fieldsToUpdate)
-                {
-                    _context
-                        .Entry(entityToUpdate)
-                        .Property(field).CurrentValue = typeof(EquipmentUpdateDTO)
-                        .GetProperty(field)?
-                        .GetValue(updates);
-                    _context
-                        .Entry(entityToUpdate)
-                        .Property(field).IsModified = true;
-                }
-
-                    await _context.SaveChangesAsync();
-
-                    if (!EquipmentExists(id))
-                    {
-                        throw new KeyNotFoundException("Equipment not found");
-                    }
-
-                return updates;
+                return await _equipmentRepository.PutEquipmentAsync(id, updates);
             }
             catch(Exception ex)
             {
@@ -135,22 +66,7 @@ namespace TiTools_backend.Services
         {
             try
             {
-                var equipments = await _context.Equipments
-                .Where(e => EquipmentIds
-                .Contains(e.EquipmentId))
-                .ToListAsync();
-
-                if (equipments.Count != EquipmentIds.Count) 
-                    throw new InvalidOperationException("One or more Equipments don't exist");
-
-                foreach (var equipment in equipments)
-                {
-                    equipment.EquipmentLoanStatus = equipmentStatus;
-                }
-                
-                await _context.SaveChangesAsync();
-                
-                return equipments;
+                return await _equipmentRepository.UpdateStatusEquipmentAsync(EquipmentIds, equipmentStatus);
             }
             catch(Exception ex)
             {
@@ -162,31 +78,12 @@ namespace TiTools_backend.Services
         {
             try
             {
-                var equipment = await _context.Equipments.FindAsync(id);
-
-                if (equipment is null)
-                    throw new InvalidOperationException("Equipment not found");
-
-                _context.Equipments.Remove(equipment);
-
-                
-                await _context.SaveChangesAsync();
-                
-                
-                    if (!EquipmentExists(id))
-                        throw new InvalidOperationException("Equipment not found");
-
-                return equipment;
+                return await _equipmentRepository.DeleteEquipmentAsync(id);
             }
             catch(Exception ex)
             {
                 throw;
             }
-        }
-
-        private bool EquipmentExists(int id)
-        {
-            return _context.Equipments.Any(e => e.EquipmentId == id);
         }
     }
 }
