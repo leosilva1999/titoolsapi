@@ -5,6 +5,7 @@ namespace TiTools_backend.Services
 {
     public interface IEquipmentService
     {
+        Task<Equipment> GetEquipmentAsync(int id);
         Task<(IEnumerable<Equipment> List, int Count)> GetEquipmentsAsync(int limit, int offset, EquipmentFilterDTO filter);
         Task<IEnumerable<object>> GetEquipmentWithLoansAsync(int id);
         Task<Equipment> PostEquipmentAsync(Equipment model);

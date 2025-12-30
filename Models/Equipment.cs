@@ -21,6 +21,9 @@ namespace TiTools_backend.Models
         public string? MacAddress { get; set; }
 
         public string? QrCode { get; set; }
+        public string? Type { get; set; }
+        public string? Manufacturer { get; set; }
+        public string? Model { get; set; }
 
         [Required(ErrorMessage = "O status do empréstimo do equipamento é obrigatório", AllowEmptyStrings = false)]
         public bool EquipmentLoanStatus { get; set; }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
@@ -12,6 +13,17 @@ namespace TiTools_backend.Repositories
         public EquipmentRepository(AppDbContext context)
         {
             _context = context;
+        }
+
+        
+        public async Task<Equipment> GetEquipmentAsync(int id)
+        {
+            var equipment = await _context.Equipments.FindAsync(id);
+
+            if (equipment == null)
+                throw new InvalidOperationException("Equipment not found!");
+
+            return equipment;
         }
 
         public async Task<(List<Equipment> List, int Count)> GetEquipmentsAsync(
@@ -28,6 +40,12 @@ namespace TiTools_backend.Repositories
                 query = query.Where(p => p.MacAddress.Contains(filter.MacAddress));
             if (filter.EquipmentLoanStatus.HasValue)
                 query = query.Where(p => p.EquipmentLoanStatus == filter.EquipmentLoanStatus);
+            if (!string.IsNullOrEmpty(filter.Type))
+                query = query.Where(p => p.Type.Contains(filter.Type)); 
+            if (!string.IsNullOrEmpty(filter.Manufacturer))
+                query = query.Where(p => p.Manufacturer.Contains(filter.Manufacturer)); 
+            if (!string.IsNullOrEmpty(filter.Model))
+                query = query.Where(p => p.Model.Contains(filter.Model));
 
             var count = await query.CountAsync();
 
@@ -72,6 +90,9 @@ namespace TiTools_backend.Repositories
                 IpAddress = model.IpAddress,
                 MacAddress = model.MacAddress,
                 QrCode = model.QrCode,
+                Type = model.Type,
+                Manufacturer = model.Manufacturer,
+                Model = model.Model,
                 EquipmentLoanStatus = model.EquipmentLoanStatus,
             };
 
@@ -93,6 +114,9 @@ namespace TiTools_backend.Repositories
             if (updates.EquipmentName != null) fieldsToUpdate.Add("EquipmentName");
             if (updates.IpAddress != null) fieldsToUpdate.Add("IpAddress");
             if (updates.MacAddress != null) fieldsToUpdate.Add("MacAddress");
+            if (updates.Type != null) fieldsToUpdate.Add("Type");
+            if (updates.Manufacturer != null) fieldsToUpdate.Add("Manufacturer");
+            if (updates.Model != null) fieldsToUpdate.Add("Model");
             if (updates.EquipmentLoanStatus != null) fieldsToUpdate.Add("EquipmentLoanStatus");
 
             foreach (var field in fieldsToUpdate)

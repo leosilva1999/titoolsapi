@@ -16,6 +16,18 @@ namespace TiTools_backend.Services
             _equipmentRepository = equipmentRepository;
         }
 
+        public async Task<Equipment> GetEquipmentAsync(int id)
+        {
+            try
+            {
+                return await _equipmentRepository.GetEquipmentAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task<(IEnumerable<Equipment> List, int Count)> GetEquipmentsAsync(int limit, int offset, EquipmentFilterDTO filter)
         {
             try { 

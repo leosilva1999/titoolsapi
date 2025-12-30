@@ -5,6 +5,9 @@ namespace TiTools_backend.Repositories
 {
     public interface IEquipmentRepository
     {
+
+        Task<Equipment> GetEquipmentAsync(int id);
+
         Task<(List<Equipment> List, int Count)> GetEquipmentsAsync(
             int limit,
             int offset,

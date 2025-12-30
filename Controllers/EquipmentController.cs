@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TiTools_backend.DTOs;
 using TiTools_backend.Services;
 using TiTools_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TiTools_backend.Controllers
 {
@@ -19,7 +20,18 @@ namespace TiTools_backend.Controllers
 
         //get
 
-        
+        [HttpGet("/api/Equipment/getequipment/{id}", Name = "GetEquipmentById")]
+        public async Task<IActionResult> GetEquipmentAsync(int id)
+        {
+            var equipment = await _equipmentService.GetEquipmentAsync(id);
+
+            if (equipment is not null)
+            {
+                return Ok(equipment);
+            }
+            return BadRequest(new { errors = "400", message = "Falha na requisição" });
+        }
+
         [Authorize(Policy = "UserOnly")]
         [HttpGet]
         public async Task<IActionResult> GetEquipmentsAsync(int limit, int offset, [FromQuery] EquipmentFilterDTO filter)
@@ -70,7 +82,7 @@ namespace TiTools_backend.Controllers
             {
                 var result = await _equipmentService.PostEquipmentAsync(model);
 
-                return CreatedAtAction(nameof(PostEquipmentAsync), new { id = result.EquipmentId }, new Response
+                return CreatedAtRoute("GetEquipmentById", new { id = result.EquipmentId }, new Response
                 {
                     Status = "Created",
                     Message = $"Equipment {model.EquipmentName} created Successfuly",
