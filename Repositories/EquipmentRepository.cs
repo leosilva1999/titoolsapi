@@ -65,6 +65,10 @@ namespace TiTools_backend.Repositories
                     {
                         e.EquipmentId,
                         e.EquipmentName,
+                        e.Type,
+                        e.Manufacturer,
+                        e.Model,
+                        e.EquipmentLoanStatus,
                         Loans = e.Loans.OrderByDescending(l => l.RequestTime).Select(l => new { l.ApplicantName, l.RequestTime, l.ReturnTime, l.LoanStatus })
                     })
                     .ToListAsync();

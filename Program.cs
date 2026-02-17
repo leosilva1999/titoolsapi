@@ -108,7 +108,12 @@ string? MySqlConnection = builder.Configuration.GetConnectionString("MySqlConnec
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(MySqlConnection, ServerVersion.AutoDetect(MySqlConnection)),
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("MySqlConnection"),
+        new MySqlServerVersion(new Version(8, 0, 36)), mySqlOptions =>
+    {
+        mySqlOptions.EnableRetryOnFailure();
+    }),
     ServiceLifetime.Transient
 );
 
@@ -118,6 +123,26 @@ builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    var retries = 5;
+    while (retries > 0)
+    {
+        try
+        {
+            db.Database.Migrate();
+            break;
+        }
+        catch
+        {
+            retries--;
+            Thread.Sleep(5000);
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -131,6 +156,7 @@ app.UseHttpsRedirection();
 
 app.UseCors(myAllowSpecificOrigins);
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

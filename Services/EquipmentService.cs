@@ -7,12 +7,10 @@ namespace TiTools_backend.Services
 {
     public class EquipmentService : IEquipmentService
     {
-        private readonly AppDbContext _context;
         private readonly IEquipmentRepository _equipmentRepository;
 
-        public EquipmentService(AppDbContext context, IEquipmentRepository equipmentRepository)
+        public EquipmentService(IEquipmentRepository equipmentRepository)
         {
-            _context = context;
             _equipmentRepository = equipmentRepository;
         }
 

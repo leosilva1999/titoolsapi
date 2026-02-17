@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
@@ -26,16 +27,10 @@ namespace TiTools_backend.Controllers
             _loanRepository = loanRepository;
         }
 
-        // GET: api/Loans
+        [Authorize(policy: "UserOnly")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Loan>>> GetLoans(int limit, int offset, [FromQuery] LoanFilterDTO filter)
         {
-            /*var loanList = await _context.Loans
-                    .OrderByDescending(x => x.RequestTime)
-                    .Skip(offset)
-
-                    .Take(limit)
-                    .ToListAsync();*/
             var filteredQuery = _loanRepository.GetLoansFiltered(filter);
             
             var loanCount = await filteredQuery.CountAsync();
@@ -58,7 +53,7 @@ namespace TiTools_backend.Controllers
             return BadRequest(new { errors = "400", message = "Falha na requisição" });
         }
 
-        // GET: api/Loans/5
+        [Authorize(policy: "UserOnly")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Loan>> GetLoan(int id)
         {
@@ -72,8 +67,7 @@ namespace TiTools_backend.Controllers
             return loan;
         }
 
-        // PUT: api/Loans/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(policy: "UserOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLoan(int id, [FromBody] LoanUpdateDTO updates)
         {
@@ -157,7 +151,7 @@ namespace TiTools_backend.Controllers
             return NoContent();
         }
 
-        // POST: api/Loans
+        [Authorize(policy: "UserOnly")]
         [HttpPost]
         public async Task<ActionResult<Loan>> PostLoan([FromBody] LoanRequestDTO loanDTO)
         {
@@ -209,7 +203,7 @@ namespace TiTools_backend.Controllers
             }
         }
 
-        // DELETE: api/Loans/5
+        [Authorize(policy: "UserOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLoan(int id)
         {
@@ -225,10 +219,12 @@ namespace TiTools_backend.Controllers
             return NoContent();
         }
 
+        [Authorize(policy: "UserOnly")]
         [HttpPut("/api/Loans/deleteequipmentfromloan/{equipmentId}")]
         public async Task<IActionResult> DeleteEquipmentFromLoan(int equipmentId)
         {
             var activeLoansWithThisEquipment = await _context.Loans
+                .Include(l => l.Equipments)
                 .Where(l => l.LoanStatus == true && l.Equipments.Any(e => e.EquipmentId == equipmentId))
                 .FirstOrDefaultAsync();
 
@@ -240,6 +236,10 @@ namespace TiTools_backend.Controllers
                 {
                     activeLoansWithThisEquipment.Equipments.Remove(equipmentToRemove);
                     await _context.SaveChangesAsync();
+                    var teste = await _context.Loans
+                    .Where(l => l.LoanStatus == true && l.Equipments.Any(e => e.EquipmentId == equipmentId))
+                    .ToListAsync();
+                    Console.WriteLine("nada");
                     return NoContent();
                 }
                 else

@@ -19,7 +19,7 @@ namespace TiTools_backend.Controllers
         }
 
         //get
-
+        [Authorize(policy: "UserOnly")]
         [HttpGet("/api/Equipment/getequipment/{id}", Name = "GetEquipmentById")]
         public async Task<IActionResult> GetEquipmentAsync(int id)
         {
@@ -37,9 +37,6 @@ namespace TiTools_backend.Controllers
         public async Task<IActionResult> GetEquipmentsAsync(int limit, int offset, [FromQuery] EquipmentFilterDTO filter)
         {
             var (equipmentList, equipmentCount) = await _equipmentService.GetEquipmentsAsync(limit, offset, filter);
-
-
-
 
             if (equipmentList is not null)
             {

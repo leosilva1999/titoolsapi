@@ -40,7 +40,7 @@ namespace TiTools_backend.Controllers
         }
 
         [HttpGet]
-        //[Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetUsers(int limit, int offset, [FromQuery] UserFilterDTO filter)
         {
             var query = _dbContext.Users.AsQueryable();
@@ -137,6 +137,7 @@ namespace TiTools_backend.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "UserOnly")]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModelDTO model)
         {
@@ -242,8 +243,10 @@ namespace TiTools_backend.Controllers
                 });
         }
 
+        //REFRESH TOKEN AINDA NÃO É UTILIZADO
+        /**
         [HttpPost]
-        //[Authorize(Policy = "UserOnly")]
+        [Authorize(Policy = "UserOnly")]
         [Route("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] TokenModelDTO tokenModel)
         {
@@ -294,9 +297,10 @@ namespace TiTools_backend.Controllers
                 errors = "false"
             });
         }
+        */
 
-        //[Authorize(Policy = "SuperAdminOnly")]
         [HttpPost]
+        [Authorize(Policy = "SuperAdminOnly")]
         [Route("revoke/{useremail}")]
         public async Task<IActionResult> Revoke(string useremail)
         {
@@ -377,15 +381,26 @@ namespace TiTools_backend.Controllers
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                var result = await _userManager.AddToRoleAsync(user, roleName);
-                if (result.Succeeded)
+                try
                 {
-                    return StatusCode(StatusCodes.Status200OK,
-                        new Response
-                        {
-                            Status = "Success",
-                            Message = $"User {user.Email} added to the {roleName} role"
-                        });
+                    var result = await _userManager.AddToRoleAsync(user, roleName);
+                    if (result.Succeeded)
+                    {
+                        return StatusCode(StatusCodes.Status200OK,
+                            new Response
+                            {
+                                Status = "Success",
+                                Message = $"User {user.Email} added to the {roleName} role"
+                            });
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("O usuário já está nesta role");
+                    }
+                }
+                catch(Exception ex)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = ex.Message });
                 }
             }
             return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User not found" });
