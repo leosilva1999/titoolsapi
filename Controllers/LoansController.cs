@@ -14,46 +14,63 @@ namespace TiTools_backend.Controllers
     public class LoansController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly ILoanRepository _loanRepository;
         private readonly ILoanService _loanService;
 
         public LoansController(AppDbContext context, ILoanRepository loanRepository,  ILoanService loanService)
         {
             _context = context;
-            _loanRepository = loanRepository;
             _loanService = loanService;
         }
 
         [Authorize(policy: "UserOnly")]
         [HttpGet]
-        public async Task<ActionResult> GetLoans(int limit, int offset, [FromQuery] LoanFilterDTO filter)
+        public async Task<ActionResult> GetLoansAsync(int limit, int offset, [FromQuery] LoanFilterDTO filter)
         {
-            var (loanList, loanCount) = await _loanService.GetLoansAsync(limit, offset, filter);
-
-            if (loanList is not null)
+            try
             {
-                return Ok(new
-                {
-                    LoanList = loanList,
-                    LoanCount = loanCount,
-                    Errors = false
-                });
+                var (loanList, loanCount) = await _loanService.GetLoansAsync(limit, offset, filter);
+                    return Ok(new
+                    {
+                        LoanList = loanList,
+                        LoanCount = loanCount,
+                        Errors = false
+                    });           
             }
-            return BadRequest(new { errors = "400", message = "Falha na requisição" });
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                   detail: ex.Message,
+                   statusCode: StatusCodes.Status500InternalServerError
+                   );
+            }
         }
 
         [Authorize(policy: "UserOnly")]
         [HttpGet("{id}")]
-        public async Task<ActionResult<Loan>> GetLoan(int id)
+        public async Task<ActionResult> GetLoanAsync(int id)
         {
-            var loan = await _context.Loans.FindAsync(id);
-
-            if (loan == null)
+            try
             {
-                return NotFound();
+                var loan = await _loanService.GetLoanAsync(id);
+
+                return Ok(loan);
+            }
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                   detail: ex.Message,
+                   statusCode: StatusCodes.Status500InternalServerError
+                   );
             }
 
-            return loan;
         }
 
         [Authorize(policy: "UserOnly")]

@@ -7,6 +7,6 @@ namespace TiTools_backend.Repositories
     {
         Task<(List<Loan> List, int Count)> GetLoansAsync(int limit, int offset, LoanFilterDTO filter);
 
-
+        Task<Loan> GetLoanAsync(int id);
     }
 }

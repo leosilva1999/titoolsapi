@@ -50,5 +50,15 @@ namespace TiTools_backend.Repositories
 
             return (list, count);
         }
+
+        public async Task<Loan> GetLoanAsync(int id)
+        {
+            var loan = await _context.Loans.FindAsync(id);
+
+            if (loan == null)
+                throw new InvalidOperationException("Loan not found!");
+
+            return loan;
+        }
     }
 }
