@@ -1,5 +1,4 @@
-﻿using TiTools_backend.Context;
-using TiTools_backend.DTOs;
+﻿using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Repositories;
 
@@ -34,7 +33,7 @@ namespace TiTools_backend.Services
             {
                 throw;
             }
-}
+        }
 
         public async Task<IEnumerable<object>> GetEquipmentWithLoansAsync(int id)
         {

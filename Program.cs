@@ -119,6 +119,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 

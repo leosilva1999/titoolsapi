@@ -47,14 +47,14 @@ namespace TiTools_backend.Repositories
             if (!string.IsNullOrEmpty(filter.Model))
                 query = query.Where(p => p.Model.Contains(filter.Model));
 
-            var count = await query.CountAsync();
+            var loanCount = await query.CountAsync();
 
-            var list = await query
+            var loanList = await query
                     .OrderBy(x => x.EquipmentName)
                     .Skip(offset)
                     .Take(limit)
                     .ToListAsync();
-            return (list, count);
+            return (loanList, loanCount);
         }
 
         public async Task<IEnumerable<object>> GetEquipmentWithLoansAsync(int id)

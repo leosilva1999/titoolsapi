@@ -5,6 +5,8 @@ namespace TiTools_backend.Repositories
 {
     public interface ILoanRepository
     {
-        public IQueryable<Loan> GetLoansFiltered(LoanFilterDTO filter);
+        Task<(List<Loan> List, int Count)> GetLoansAsync(int limit, int offset, LoanFilterDTO filter);
+
+
     }
 }

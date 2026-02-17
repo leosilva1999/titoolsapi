@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Repositories;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using TiTools_backend.Services;
 
 namespace TiTools_backend.Controllers
 {
@@ -20,26 +15,20 @@ namespace TiTools_backend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILoanRepository _loanRepository;
+        private readonly ILoanService _loanService;
 
-        public LoansController(AppDbContext context, ILoanRepository loanRepository)
+        public LoansController(AppDbContext context, ILoanRepository loanRepository,  ILoanService loanService)
         {
             _context = context;
             _loanRepository = loanRepository;
+            _loanService = loanService;
         }
 
         [Authorize(policy: "UserOnly")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Loan>>> GetLoans(int limit, int offset, [FromQuery] LoanFilterDTO filter)
+        public async Task<ActionResult> GetLoans(int limit, int offset, [FromQuery] LoanFilterDTO filter)
         {
-            var filteredQuery = _loanRepository.GetLoansFiltered(filter);
-            
-            var loanCount = await filteredQuery.CountAsync();
-
-            var loanList = filteredQuery
-                    .Skip(offset)
-                    .Take(limit)
-                    .Include(l => l.Equipments)
-                    .ToListAsync();
+            var (loanList, loanCount) = await _loanService.GetLoansAsync(limit, offset, filter);
 
             if (loanList is not null)
             {
