@@ -93,5 +93,30 @@ namespace TiTools_backend.Services
                 throw;
             }
         }
+
+        public async Task<Loan> PostLoan(LoanRequestDTO loanDTO)
+        {
+            try
+            {
+                var loan = new Loan
+                {
+                    ApplicantName = loanDTO.ApplicantName,
+                    AuthorizedBy = loanDTO.AuthorizedBy,
+                    RequestTime = loanDTO.RequestTime,
+                    ReturnTime = loanDTO.ReturnTime,
+                    LoanStatus = true,
+                    Equipments = await _equipmentRepository.GetEquipmentsByIdAsync(loanDTO.EquipmentIds),
+                };
+
+                if (loanDTO.ReturnTime < loanDTO.RequestTime)
+                    throw new InvalidOperationException("A data de recebimento é menor que a data de empréstimo");
+
+                return await _loanRepository.PostLoanAsync(loanDTO);
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

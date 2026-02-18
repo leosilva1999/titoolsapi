@@ -87,22 +87,10 @@ namespace TiTools_backend.Repositories
                 throw new InvalidOperationException("Equipment already exists!");
             }
 
-            Equipment equipment = new()
-            {
-                EquipmentName = model.EquipmentName,
-                IpAddress = model.IpAddress,
-                MacAddress = model.MacAddress,
-                QrCode = model.QrCode,
-                Type = model.Type,
-                Manufacturer = model.Manufacturer,
-                Model = model.Model,
-                EquipmentLoanStatus = model.EquipmentLoanStatus,
-            };
-
-            await _context.AddAsync(equipment);
+            await _context.AddAsync(model);
             await _context.SaveChangesAsync();
 
-            return equipment;
+            return model;
         }
 
         public async Task<EquipmentUpdateDTO> PutEquipmentAsync(int id, List<string> fieldsToUpdate, EquipmentUpdateDTO updates, Equipment entityToUpdate)

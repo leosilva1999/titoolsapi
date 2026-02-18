@@ -50,7 +50,7 @@ namespace TiTools_backend.Controllers
         }
 
         [Authorize(policy: "UserOnly")]
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetLoanAsync")]
         public async Task<ActionResult> GetLoanAsync(int id)
         {
             try
@@ -100,51 +100,28 @@ namespace TiTools_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Loan>> PostLoan([FromBody] LoanRequestDTO loanDTO)
         {
-            Console.WriteLine(loanDTO);
-            var loan = new Loan
-            {
-                ApplicantName = loanDTO.ApplicantName,
-                AuthorizedBy = loanDTO.AuthorizedBy,
-                RequestTime = loanDTO.RequestTime,
-                ReturnTime = loanDTO.ReturnTime,
-                LoanStatus = true,
-                Equipments =  await _context.Equipments
-                    .Where(e => loanDTO.EquipmentIds
-                        .Contains(e.EquipmentId))
-                .ToListAsync(),
-            };
-
-            if (loan.ReturnTime < loan.RequestTime)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest,
-                    new Response
-                    {
-                        Status = "Error",
-                        Message = $"A data de recebimento é menor que a data de empréstimo"
-                    });
-            }
-
             try
             {
-                await _context.AddAsync(loan);
-                await _context.SaveChangesAsync();
-                return StatusCode(StatusCodes.Status201Created,
-                    new Response
-                    {
-                        Status = "Created",
-                        Message = $"Loan created Successfuly"
-                    });
+                var result = await _loanService.PostLoan(loanDTO);
+
+
+                return CreatedAtRoute("GetLoanAsync", new { id = result.LoanId }, new Response
+                {
+                    Status = "Created",
+                    Message = $"Loan created Successfuly",
+                    Return = result
+                });
+            }
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
             }
             catch (Exception ex)
             {
-
-                return StatusCode(
-                    StatusCodes.Status500InternalServerError,
-                    new Response
-                    {
-                        Status = "Error",
-                        Message = $"Loan creation failed: {ex}"
-                    });
+                return Problem(
+                   detail: ex.Message,
+                   statusCode: StatusCodes.Status500InternalServerError
+                   );
             }
         }
 

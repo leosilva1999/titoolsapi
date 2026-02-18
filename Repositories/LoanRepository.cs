@@ -81,5 +81,27 @@ namespace TiTools_backend.Repositories
 
             return updates;
         }
+
+        public async Task<Loan> PostLoanAsync(LoanRequestDTO loanDTO)
+        {
+            var loan = new Loan
+            {
+                ApplicantName = loanDTO.ApplicantName,
+                AuthorizedBy = loanDTO.AuthorizedBy,
+                RequestTime = loanDTO.RequestTime,
+                ReturnTime = loanDTO.ReturnTime,
+                LoanStatus = true,
+                Equipments = await _context.Equipments
+                    .Where(e => loanDTO.EquipmentIds
+                        .Contains(e.EquipmentId))
+                .ToListAsync(),
+            };
+
+
+            await _context.AddAsync(loan);
+            await _context.SaveChangesAsync();
+
+            return loan;
+        }
     }
 }

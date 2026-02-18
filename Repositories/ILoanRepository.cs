@@ -11,5 +11,6 @@ namespace TiTools_backend.Repositories
         Task<Loan> GetLoanAsync(int id);
 
         Task<LoanUpdateDTO> PutLoan(int id, List<string> fieldsToUpdate, LoanUpdateDTO updates, Loan entityToUpdate);
+        Task<Loan> PostLoanAsync(LoanRequestDTO loanDTO);
     }
 }
