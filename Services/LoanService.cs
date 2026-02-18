@@ -118,5 +118,17 @@ namespace TiTools_backend.Services
                 throw;
             }
         }
+
+        public async Task<Loan> DeleteLoanAsync(int id)
+        {
+            try
+            {
+                return await _loanRepository.DeleteLoanAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

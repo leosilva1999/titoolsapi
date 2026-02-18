@@ -127,18 +127,30 @@ namespace TiTools_backend.Controllers
 
         [Authorize(policy: "UserOnly")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLoan(int id)
+        public async Task<IActionResult> DeleteLoanAsync(int id)
         {
-            var loan = await _context.Loans.FindAsync(id);
-            if (loan == null)
+            try
             {
-                return NotFound();
+                var response = await _loanService.DeleteLoanAsync(id);
+
+                return Ok(new Response
+                {
+                    Return = response,
+                    Status = "OK",
+                    Message = "Loan deleted"
+                });
             }
-
-            _context.Loans.Remove(loan);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
+            }
         }
 
         [Authorize(policy: "UserOnly")]

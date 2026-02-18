@@ -103,5 +103,17 @@ namespace TiTools_backend.Repositories
 
             return loan;
         }
+
+        public async Task<Loan> DeleteLoanAsync(int id)
+        {
+            var loan = await _context.Loans.FindAsync(id);
+            if (loan == null)
+                throw new InvalidOperationException("Loan not found!");
+
+            _context.Loans.Remove(loan);
+            await _context.SaveChangesAsync();
+
+            return loan;
+        }
     }
 }

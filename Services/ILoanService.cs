@@ -9,5 +9,6 @@ namespace TiTools_backend.Services
         Task<Loan> GetLoanAsync(int id);
         Task<LoanUpdateDTO> PutLoan(int id, LoanUpdateDTO updates);
         Task<Loan> PostLoan(LoanRequestDTO loanDTO);
+        Task<Loan> DeleteLoanAsync(int id);
     }
 }
