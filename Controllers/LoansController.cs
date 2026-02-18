@@ -77,84 +77,23 @@ namespace TiTools_backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLoan(int id, [FromBody] LoanUpdateDTO updates)
         {
-            var entityToUpdate = await _context.Loans
-                .Include(l => l.Equipments)
-                .FirstOrDefaultAsync(l => l.LoanId == id);
-
-            if (entityToUpdate == null) return NotFound();
-            if (updates.ReturnTime < updates.RequestTime)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest,
-                    new Response
-                    {
-                        Status = "Error",
-                        Message = $"A data de recebimento é menor que a data de empréstimo"
-                    });
-            }
-
-            var fieldsToUpdate = new List<string>();
-
-            if (updates.LoanStatus != null) fieldsToUpdate.Add("LoanStatus");
-            if (updates.ApplicantName != null) fieldsToUpdate.Add("ApplicantName");
-            if (updates.AuthorizedBy != null) fieldsToUpdate.Add("AuthorizedBy");
-            if (updates.RequestTime != null) fieldsToUpdate.Add("RequestTime");
-            if (updates.ReturnTime != null) fieldsToUpdate.Add("ReturnTime");
-
-            if (updates.EquipmentIds != null && updates.EquipmentIds.Any()) {
-                var existingEquipments = entityToUpdate.Equipments
-                    .ToList();
-
-                var newEquipments = await _context.Equipments
-                    .Where(e => updates.EquipmentIds
-                        .Contains(e.EquipmentId))
-                    .ToListAsync();
-
-                foreach(var equipment in existingEquipments)
-                {
-                    if(!newEquipments.Any(e => e.EquipmentId == equipment.EquipmentId))
-                    {
-                        entityToUpdate.Equipments.Remove(equipment);
-                    }
-                }
-
-                foreach(var equipment in newEquipments)
-                {
-                    if(!existingEquipments.Any(e => e.EquipmentId == equipment.EquipmentId)){
-                        entityToUpdate.Equipments.Add(equipment);
-                    }
-                }
-                
-            }
-
-            foreach (var field in fieldsToUpdate)
-            {
-                _context
-                    .Entry(entityToUpdate)
-                    .Property(field).CurrentValue = typeof(LoanUpdateDTO)
-                    .GetProperty(field)?
-                    .GetValue(updates);
-                _context
-                    .Entry(entityToUpdate)
-                    .Property(field).IsModified = true;
-            }
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LoanExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                var result = await _loanService.PutLoan(id, updates);
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                   detail: ex.Message,
+                   statusCode: StatusCodes.Status500InternalServerError
+                   );
+            }
         }
 
         [Authorize(policy: "UserOnly")]

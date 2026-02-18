@@ -7,5 +7,6 @@ namespace TiTools_backend.Services
     {
         Task<(IEnumerable<Loan> loanList, int loanCount)> GetLoansAsync(int limit, int offset, LoanFilterDTO filter);
         Task<Loan> GetLoanAsync(int id);
+        Task<LoanUpdateDTO> PutLoan(int id, LoanUpdateDTO updates);
     }
 }

@@ -53,12 +53,33 @@ namespace TiTools_backend.Repositories
 
         public async Task<Loan> GetLoanAsync(int id)
         {
-            var loan = await _context.Loans.FindAsync(id);
+            var loan = await _context.Loans
+                .Include(l => l.Equipments)
+                .FirstOrDefaultAsync(l => l.LoanId == id);
 
             if (loan == null)
                 throw new InvalidOperationException("Loan not found!");
 
             return loan;
+        }
+
+        public async Task<LoanUpdateDTO> PutLoan(int id, List<string> fieldsToUpdate, LoanUpdateDTO updates, Loan entityToUpdate)
+        {
+            foreach (var field in fieldsToUpdate)
+            {
+                _context
+                    .Entry(entityToUpdate)
+                    .Property(field).CurrentValue = typeof(LoanUpdateDTO)
+                    .GetProperty(field)?
+                    .GetValue(updates);
+                _context
+                    .Entry(entityToUpdate)
+                    .Property(field).IsModified = true;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return updates;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using TiTools_backend.DTOs;
+﻿using Microsoft.EntityFrameworkCore;
+using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Repositories;
 
@@ -63,7 +64,21 @@ namespace TiTools_backend.Services
         {
             try
             {
-                return await _equipmentRepository.PutEquipmentAsync(id, updates);
+                var entityToUpdate = await _equipmentRepository.GetEquipmentAsync(id);
+
+                if (entityToUpdate == null) throw new KeyNotFoundException("Equipment not found!");
+
+                var fieldsToUpdate = new List<string>();
+
+                if (updates.EquipmentName != null) fieldsToUpdate.Add("EquipmentName");
+                if (updates.IpAddress != null) fieldsToUpdate.Add("IpAddress");
+                if (updates.MacAddress != null) fieldsToUpdate.Add("MacAddress");
+                if (updates.Type != null) fieldsToUpdate.Add("Type");
+                if (updates.Manufacturer != null) fieldsToUpdate.Add("Manufacturer");
+                if (updates.Model != null) fieldsToUpdate.Add("Model");
+                if (updates.EquipmentLoanStatus != null) fieldsToUpdate.Add("EquipmentLoanStatus");
+
+                return await _equipmentRepository.PutEquipmentAsync(id, fieldsToUpdate, updates, entityToUpdate);
             }
             catch(Exception ex)
             {

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TiTools_backend.Context;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
@@ -106,23 +105,8 @@ namespace TiTools_backend.Repositories
             return equipment;
         }
 
-        public async Task<EquipmentUpdateDTO> PutEquipmentAsync(int id, EquipmentUpdateDTO updates)
+        public async Task<EquipmentUpdateDTO> PutEquipmentAsync(int id, List<string> fieldsToUpdate, EquipmentUpdateDTO updates, Equipment entityToUpdate)
         {
-            var entityToUpdate = await _context.Equipments
-                .FirstOrDefaultAsync(e => e.EquipmentId == id);
-
-            if (entityToUpdate == null) throw new InvalidOperationException("Equipment not found!"); ;
-
-            var fieldsToUpdate = new List<string>();
-
-            if (updates.EquipmentName != null) fieldsToUpdate.Add("EquipmentName");
-            if (updates.IpAddress != null) fieldsToUpdate.Add("IpAddress");
-            if (updates.MacAddress != null) fieldsToUpdate.Add("MacAddress");
-            if (updates.Type != null) fieldsToUpdate.Add("Type");
-            if (updates.Manufacturer != null) fieldsToUpdate.Add("Manufacturer");
-            if (updates.Model != null) fieldsToUpdate.Add("Model");
-            if (updates.EquipmentLoanStatus != null) fieldsToUpdate.Add("EquipmentLoanStatus");
-
             foreach (var field in fieldsToUpdate)
             {
                 _context
@@ -136,11 +120,6 @@ namespace TiTools_backend.Repositories
             }
 
             await _context.SaveChangesAsync();
-
-            if (!EquipmentExists(id))
-            {
-                throw new KeyNotFoundException("Equipment not found");
-            }
 
             return updates;
         }
@@ -182,6 +161,19 @@ namespace TiTools_backend.Repositories
                 throw new InvalidOperationException("Equipment not found");
 
             return equipment;
+        }
+
+        public async Task<List<Equipment>> GetEquipmentsByIdAsync(List<int> equipmentIds)
+        {
+            var newEquipments = await _context.Equipments
+                    .Where(e => equipmentIds
+                        .Contains(e.EquipmentId))
+                    .ToListAsync();
+
+            if (newEquipments is null)
+                throw new InvalidOperationException("None of the equipment was found");
+
+            return newEquipments;
         }
 
         private bool EquipmentExists(int id)

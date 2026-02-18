@@ -17,10 +17,12 @@ namespace TiTools_backend.Repositories
 
         Task<Equipment> PostEquipmentAsync(Equipment model);
 
-        Task<EquipmentUpdateDTO> PutEquipmentAsync(int id, EquipmentUpdateDTO updates);
+        Task<EquipmentUpdateDTO> PutEquipmentAsync(int id, List<string> fieldsToUpdate, EquipmentUpdateDTO updates, Equipment entityToUpdate);
 
         Task<IEnumerable<Equipment>> UpdateStatusEquipmentAsync(List<int> EquipmentIds, bool equipmentStatus);
 
         Task<Equipment> DeleteEquipmentAsync(int id);
+
+        Task<List<Equipment>> GetEquipmentsByIdAsync(List<int> equipmentIds);
     }
 }
