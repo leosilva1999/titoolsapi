@@ -130,5 +130,16 @@ namespace TiTools_backend.Services
                 throw;
             }
         }
+        public async Task<Loan> DeleteEquipmentFromLoan(int id)
+        {
+            try
+            {
+                return await _loanRepository.DeleteEquipmentFromLoan(id);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

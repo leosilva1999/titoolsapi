@@ -153,52 +153,36 @@ namespace TiTools_backend.Controllers
             }
         }
 
+
+        //REFATORAR
         [Authorize(policy: "UserOnly")]
         [HttpPut("/api/Loans/deleteequipmentfromloan/{equipmentId}")]
         public async Task<IActionResult> DeleteEquipmentFromLoan(int equipmentId)
         {
-            var activeLoansWithThisEquipment = await _context.Loans
-                .Include(l => l.Equipments)
-                .Where(l => l.LoanStatus == true && l.Equipments.Any(e => e.EquipmentId == equipmentId))
-                .FirstOrDefaultAsync();
 
-            var equipmentToRemove = await _context.Equipments.FindAsync(equipmentId);
 
             try
             {
-                if (activeLoansWithThisEquipment != null && equipmentToRemove != null)
-                {
-                    activeLoansWithThisEquipment.Equipments.Remove(equipmentToRemove);
-                    await _context.SaveChangesAsync();
-                    var teste = await _context.Loans
-                    .Where(l => l.LoanStatus == true && l.Equipments.Any(e => e.EquipmentId == equipmentId))
-                    .ToListAsync();
-                    Console.WriteLine("nada");
-                    return NoContent();
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Response
-                    {
-                        Status = "Error",
-                        Message = $"Erro ao remover o equipamento"
-                    });
-                }
-            }catch(Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Response
-                    {
-                        Status = "Error",
-                        Message = $"Erro ao remover o equipamento: {ex}"
-                    });
-            }
-        }
+                var response = await _loanService.DeleteEquipmentFromLoan(equipmentId);
 
-        private bool LoanExists(int id)
-        {
-            return _context.Loans.Any(e => e.LoanId == id);
+                return Ok(new Response
+                {
+                    Return = response,
+                    Status = "OK",
+                    Message = "Equipment deleted From Loan"
+                });
+            }
+            catch (InvalidOperationException ioex)
+            {
+                return BadRequest(new { message = ioex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError
+                    );
+            }
         }
     }
 }

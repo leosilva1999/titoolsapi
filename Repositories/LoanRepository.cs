@@ -115,5 +115,24 @@ namespace TiTools_backend.Repositories
 
             return loan;
         }
+
+        public async Task<Loan> DeleteEquipmentFromLoan(int equipmentId)
+        {
+            var activeLoansWithThisEquipment = await _context.Loans
+                .Include(l => l.Equipments)
+                .Where(l => l.LoanStatus == true && l.Equipments.Any(e => e.EquipmentId == equipmentId))
+                .FirstOrDefaultAsync();
+
+            var equipmentToRemove = await _context.Equipments.FindAsync(equipmentId);
+
+            if (activeLoansWithThisEquipment == null || equipmentToRemove == null)
+                throw new InvalidOperationException("Loan or equipment not found!");
+
+            activeLoansWithThisEquipment.Equipments.Remove(equipmentToRemove);
+            await _context.SaveChangesAsync();
+
+            return activeLoansWithThisEquipment;
+            
+        }
     }
 }
