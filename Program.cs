@@ -123,6 +123,14 @@ builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 
+if (!builder.Environment.IsDevelopment())
+{
+    builder.WebHost.ConfigureKestrel(serverOptions =>
+    {
+        serverOptions.ListenAnyIP(8080);
+    });
+}
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

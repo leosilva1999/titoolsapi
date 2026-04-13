@@ -8,10 +8,7 @@ using System.Security.Claims;
 using TiTools_backend.DTOs;
 using TiTools_backend.Models;
 using TiTools_backend.Services;
-using System.Linq;
 using TiTools_backend.Context;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
 
 namespace TiTools_backend.Controllers
@@ -243,8 +240,7 @@ namespace TiTools_backend.Controllers
                 });
         }
 
-        //REFRESH TOKEN AINDA NÃO É UTILIZADO
-        /**
+
         [HttpPost]
         [Authorize(Policy = "UserOnly")]
         [Route("refresh-token")]
@@ -290,14 +286,15 @@ namespace TiTools_backend.Controllers
             user.RefreshToken = newRefreshToken;
             await _userManager.UpdateAsync(user);
 
-            return new ObjectResult(new
+            return Ok(new
             {
-                accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
-                refreshToken = newRefreshToken,
-                errors = "false"
+                Token = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+                RefreshToken = newRefreshToken,
+                Expiration = newAccessToken.ValidTo,
+                Errors = false
             });
         }
-        */
+        
 
         [HttpPost]
         [Authorize(Policy = "SuperAdminOnly")]
