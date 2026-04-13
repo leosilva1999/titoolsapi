@@ -7,17 +7,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TiTools_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateTablesIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            /*migrationBuilder.AddColumn<int>(
-                name: "LoanId",
-                table: "Equipments",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);*/
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
@@ -44,6 +40,9 @@ namespace TiTools_backend.Migrations
                 {
                     Id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    RefreshToken = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -73,7 +72,35 @@ namespace TiTools_backend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            /*migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
+                name: "Equipments",
+                columns: table => new
+                {
+                    EquipmentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    EquipmentName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IpAddress = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MacAddress = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    QrCode = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Type = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Manufacturer = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Model = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EquipmentLoanStatus = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Equipments", x => x.EquipmentId);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Loans",
                 columns: table => new
                 {
@@ -81,14 +108,17 @@ namespace TiTools_backend.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ApplicantName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    AuthorizedBy = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     RequestTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    ReturnTime = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    ReturnTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    LoanStatus = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Loans", x => x.LoanId);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");*/
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
@@ -217,10 +247,30 @@ namespace TiTools_backend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            /*migrationBuilder.CreateIndex(
-                name: "IX_Equipments_LoanId",
-                table: "Equipments",
-                column: "LoanId");*/
+            migrationBuilder.CreateTable(
+                name: "EquipmentLoan",
+                columns: table => new
+                {
+                    EquipmentsEquipmentId = table.Column<int>(type: "int", nullable: false),
+                    LoansLoanId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EquipmentLoan", x => new { x.EquipmentsEquipmentId, x.LoansLoanId });
+                    table.ForeignKey(
+                        name: "FK_EquipmentLoan_Equipments_EquipmentsEquipmentId",
+                        column: x => x.EquipmentsEquipmentId,
+                        principalTable: "Equipments",
+                        principalColumn: "EquipmentId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EquipmentLoan_Loans_LoansLoanId",
+                        column: x => x.LoansLoanId,
+                        principalTable: "Loans",
+                        principalColumn: "LoanId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -259,19 +309,15 @@ namespace TiTools_backend.Migrations
                 column: "NormalizedUserName",
                 unique: true);
 
-            /*migrationBuilder.AddForeignKey(
-                name: "FK_Equipments_Loans_LoanId",
-                table: "Equipments",
-                column: "LoanId",
-                principalTable: "Loans",
-                principalColumn: "LoanId",
-                onDelete: ReferentialAction.Cascade);*/
+            migrationBuilder.CreateIndex(
+                name: "IX_EquipmentLoan_LoansLoanId",
+                table: "EquipmentLoan",
+                column: "LoansLoanId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
-        {           
-
+        {
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -288,12 +334,19 @@ namespace TiTools_backend.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "EquipmentLoan");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
-            
+            migrationBuilder.DropTable(
+                name: "Equipments");
+
+            migrationBuilder.DropTable(
+                name: "Loans");
         }
     }
 }

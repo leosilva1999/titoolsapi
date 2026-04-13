@@ -12,18 +12,33 @@ using TiTools_backend.Context;
 namespace TiTools_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240729170511_LoanTableCreating")]
-    partial class LoanTableCreating
+    [Migration("20260413132145_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("EquipmentLoan", b =>
+                {
+                    b.Property<int>("EquipmentsEquipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LoansLoanId")
+                        .HasColumnType("int");
+
+                    b.HasKey("EquipmentsEquipmentId", "LoansLoanId");
+
+                    b.HasIndex("LoansLoanId");
+
+                    b.ToTable("EquipmentLoan");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -246,18 +261,22 @@ namespace TiTools_backend.Migrations
                     b.Property<string>("IpAddress")
                         .HasColumnType("longtext");
 
-                    b.Property<int>("LoanId")
-                        .HasColumnType("int");
-
                     b.Property<string>("MacAddress")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Manufacturer")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Model")
                         .HasColumnType("longtext");
 
                     b.Property<string>("QrCode")
                         .HasColumnType("longtext");
 
-                    b.HasKey("EquipmentId");
+                    b.Property<string>("Type")
+                        .HasColumnType("longtext");
 
-                    b.HasIndex("LoanId");
+                    b.HasKey("EquipmentId");
 
                     b.ToTable("Equipments");
                 });
@@ -275,15 +294,38 @@ namespace TiTools_backend.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("AuthorizedBy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("LoanStatus")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<DateTime>("RequestTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTime>("ReturnTime")
+                    b.Property<DateTime?>("ReturnTime")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("LoanId");
 
                     b.ToTable("Loans");
+                });
+
+            modelBuilder.Entity("EquipmentLoan", b =>
+                {
+                    b.HasOne("TiTools_backend.Models.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("EquipmentsEquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TiTools_backend.Models.Loan", null)
+                        .WithMany()
+                        .HasForeignKey("LoansLoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -335,22 +377,6 @@ namespace TiTools_backend.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("TiTools_backend.Models.Equipment", b =>
-                {
-                    b.HasOne("TiTools_backend.Models.Loan", "Loan")
-                        .WithMany("Equipments")
-                        .HasForeignKey("LoanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Loan");
-                });
-
-            modelBuilder.Entity("TiTools_backend.Models.Loan", b =>
-                {
-                    b.Navigation("Equipments");
                 });
 #pragma warning restore 612, 618
         }
