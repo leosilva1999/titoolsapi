@@ -22,7 +22,7 @@ builder.Services.AddHealthChecksUI(options =>
 {
     options.SetEvaluationTimeInSeconds(5);
     options.MaximumHistoryEntriesPerEndpoint(5);
-    options.AddHealthCheckEndpoint("API Health Check", "/health");
+    options.AddHealthCheckEndpoint("API Health Check", "http://localhost/health");
 }).AddInMemoryStorage();
 
 builder.Services.AddSwaggerGen(c =>
@@ -131,14 +131,6 @@ builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
-
-if (!builder.Environment.IsDevelopment())
-{
-    builder.WebHost.ConfigureKestrel(serverOptions =>
-    {
-        serverOptions.ListenAnyIP(8080);
-    });
-}
 
 var app = builder.Build();
 
