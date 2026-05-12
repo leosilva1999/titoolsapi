@@ -26,9 +26,14 @@ services:
             MYSQL_PASSWORD: tuXKbm1F1b4b
         ports:
             - "3307:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
         healthcheck:
             test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
             interval: 5s
             timeout: 5s
             retries: 20
             start_period: 60s
+
+volumes:
+    mysql_data:    
