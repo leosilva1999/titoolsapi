@@ -297,7 +297,7 @@ namespace TiTools_backend.Controllers
         
 
         [HttpPost]
-        [Authorize(Policy = "SuperAdminOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [Route("revoke/{useremail}")]
         public async Task<IActionResult> Revoke(string useremail)
         {
@@ -346,7 +346,7 @@ namespace TiTools_backend.Controllers
                 }
         }
 
-        [Authorize(Policy = "SuperAdminOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         [Route("CreateRole")]
         public async Task<IActionResult> CreateRole(string roleName)

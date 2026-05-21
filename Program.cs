@@ -69,7 +69,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+            policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://10.143.129.3:3000", "http://localhost:3000")
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
@@ -99,17 +99,17 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin", "SuperAmin"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin", "superadmin"));
 
     options.AddPolicy("SuperAdminOnly", policy => 
-        policy.RequireRole("Admin").RequireClaim("id", "Teste"));
+        policy.RequireRole("Admin").RequireClaim("id", "Admin"));
 
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("user", "admin", "SuperAdmin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("user", "admin", "superadmin"));
 
     options.AddPolicy("ExclusiveOnly",
         policy => policy.RequireAssertion(context =>
         context.User.HasClaim(claim => claim.Type == "id" &&
-                                       claim.Value == "Teste") ||
+                                       claim.Value == "Admin") ||
                                        context.User.IsInRole("SuperAdmin")));
 });
 
@@ -152,6 +152,11 @@ using (var scope = app.Services.CreateScope())
             Thread.Sleep(5000);
         }
     }
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await IdentitySeed.SeedAsync(userManager, roleManager);
 }
 
 // Configure the HTTP request pipeline.
