@@ -102,15 +102,15 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin", "superadmin"));
 
     options.AddPolicy("SuperAdminOnly", policy => 
-        policy.RequireRole("Admin").RequireClaim("id", "Admin"));
+        policy.RequireRole("admin").RequireClaim("id", "admin"));
 
     options.AddPolicy("UserOnly", policy => policy.RequireRole("user", "admin", "superadmin"));
 
     options.AddPolicy("ExclusiveOnly",
         policy => policy.RequireAssertion(context =>
         context.User.HasClaim(claim => claim.Type == "id" &&
-                                       claim.Value == "Admin") ||
-                                       context.User.IsInRole("SuperAdmin")));
+                                       claim.Value == "admin") ||
+                                       context.User.IsInRole("superadmin")));
 });
 
 string? MySqlConnection = builder.Configuration.GetConnectionString("MySqlConnection");
@@ -137,6 +137,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var services = scope.ServiceProvider;
 
     var retries = 5;
     while (retries > 0)
@@ -155,8 +156,9 @@ using (var scope = app.Services.CreateScope())
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var environment = services.GetRequiredService<IHostEnvironment>();
 
-    await IdentitySeed.SeedAsync(userManager, roleManager);
+    await IdentitySeed.SeedAsync(userManager, roleManager, environment);
 }
 
 // Configure the HTTP request pipeline.

@@ -5,12 +5,22 @@ public static class IdentitySeed
 {
     public static async Task SeedAsync(
         UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager,
+        IHostEnvironment environment)
     {
         var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD");
 
         if (string.IsNullOrEmpty(adminPassword))
-            throw new Exception("ADMIN_PASSWORD não configurada");
+        {
+            if (environment.IsDevelopment())
+            {
+                adminPassword = "Teste@123";
+            }
+            else
+            {
+                throw new Exception("ADMIN_PASSWORD não configurada");
+            }
+        }
 
         string[] roles = { "superadmin", "admin", "user" };
 
