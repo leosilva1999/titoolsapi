@@ -145,8 +145,8 @@ namespace TiTools_backend.Repositories
             await _context.SaveChangesAsync();
 
 
-            if (!EquipmentExists(id))
-                throw new InvalidOperationException("Equipment not found");
+            if (EquipmentExists(id))
+                throw new InvalidOperationException("Error: Equipment not delete!");
 
             return equipment;
         }

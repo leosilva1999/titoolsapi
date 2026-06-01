@@ -174,7 +174,7 @@ namespace TiTools_backend.Controllers
             }
             catch (InvalidOperationException ioex)
             {
-                return BadRequest(new { message = ioex.Message });
+                return BadRequest(new Response { Message = ioex.Message, Status = "BadRequest", });
             }
             catch (Exception ex)
             {
